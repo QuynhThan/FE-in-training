@@ -1,33 +1,37 @@
-import { PRODUCTS_URL } from '../constants';
+import { SUBJECTS_URL } from '../constants';
 import { apiSlice } from './apiSlice';
 
-export const productsApiSlice = apiSlice.injectEndpoints({
+const searchRequest = {};
+
+export const SubjectsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getProducts: builder.query({ 
-      query: ({ keyword, pageNumber }) => ({
-        url: `${PRODUCTS_URL}/retrieve-all`, 
+    getSubjects: builder.query({ 
+      query: ({ search }) => ({
+        url: `${SUBJECTS_URL}/retrieve`,
+        method: 'POST', 
+        body: search
         // params: { keyword, pageNumber },
       }),
-      keepUnusedDataFor: 5,
-      providesTags: ['Products'],
+      // keepUnusedDataFor: 5,
+      providesTags: ['Subjects'],
     }),
     getProductDetails: builder.query({
       query: (productId) => ({
-        url: `${PRODUCTS_URL}/retrieve/${productId}`,
+        url: `${SUBJECTS_URL}/retrieve/${productId}`,
       }),
       keepUnusedDataFor: 5,
     }),
     createProduct: builder.mutation({
       query: (data) => ({
-        url: `${PRODUCTS_URL}/add`,
+        url: `${SUBJECTS_URL}/add`,
         method: 'POST',
         body: data
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: ['Subject'],
     }),
     updateProduct: builder.mutation({
       query: (data) => ({
-        url: `${PRODUCTS_URL}/update`,
+        url: `${SUBJECTS_URL}/update`,
         method: 'POST',
         body: data,
       }),
@@ -35,53 +39,54 @@ export const productsApiSlice = apiSlice.injectEndpoints({
     }),
     uploadProductImage: builder.mutation({
       query: (data) => ({
-        url: `${PRODUCTS_URL}/update-image`,
+        url: `${SUBJECTS_URL}/update-image`,
         method: 'POST',
         body: data,
       }),
     }),
     deleteProduct: builder.mutation({
-      query: (productId) => ({
-        url: `${PRODUCTS_URL}/delete/${productId}`,
+      query: (subject) => ({
+        url: `${SUBJECTS_URL}/delete`,
         method: 'POST',
+        body: subject
       }),
       providesTags: ['Product'],
     }),
     createReview: builder.mutation({
       query: (data) => ({
-        url: `${PRODUCTS_URL}/${data.productId}/reviews`,
+        url: `${SUBJECTS_URL}/${data.productId}/reviews`,
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Product'],
     }),
     getTopProducts: builder.query({
-      query: () => `${PRODUCTS_URL}/top`, 
+      query: () => `${SUBJECTS_URL}/top`, 
       keepUnusedDataFor: 5,
     }),
     getInvalidProducts: builder.query({
       query: ({ keyword, pageNumber, field }) => ({
-        url: `${PRODUCTS_URL}/retrieve`,
+        url: `${SUBJECTS_URL}/retrieve`,
         params: { keyword, pageNumber, field },
       }),
       keepUnusedDataFor: 5,
       providesTags: ['Products'],
     }),
     getFilter: builder.query({
-      query: () => `${PRODUCTS_URL}/filters`,
+      query: () => `${SUBJECTS_URL}/filters`,
     }),
   }),
 });
 
 export const {
-  useGetProductsQuery,
+  useGetSubjectsQuery,
   useGetProductDetailsQuery,
-  useCreateProductMutation,
+  useCreateProductMutation: useCreateSubjectMutation,
   useUpdateProductMutation,
   useUploadProductImageMutation,
-  useDeleteProductMutation,
+  useDeleteProductMutation: useDeleteSubjectMutation,
   useCreateReviewMutation,
   useGetTopProductsQuery,
   useGetInvalidProductsQuery,
   useGetFilterQuery,
-} = productsApiSlice;
+} = SubjectsApiSlice;

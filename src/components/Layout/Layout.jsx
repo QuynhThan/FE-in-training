@@ -5,18 +5,14 @@ import Sidebar from "../Sidebar/Sidebar";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 const Layout = () => {
-
-  const { pathname } = useLocation()
-
+  const { pathname } = useLocation();
 
   return (
     <div className={css.container}>
       <Sidebar />
 
-
       {/* making the dashboard as the default route */}
       {pathname === "/" && <Navigate to="/dashboard" />}
-
 
       <div className={css.dashboard}>
         <div className={css.topBaseGradients}>
@@ -26,7 +22,6 @@ const Layout = () => {
         </div>
 
         <div className={css.header}>
-
           <span>{moment().format("dddd, Do MMM YYYY")}</span>
 
           <div className={css.searchBar}>
@@ -35,16 +30,13 @@ const Layout = () => {
           </div>
 
           <div className={css.profile}>
-            <img src="./profile.png" alt="person image" />
+            <img src="./avatar.jpg" alt="person image" />
             <div className={css.details}>
-              <span>Denis Steven</span>
-              <span>devissteven@gmail.com</span>
+              <span>Quỳnh Thân</span>
+              <span>N19DCCN154@gmail.com</span>
             </div>
           </div>
-
-
         </div>
-
 
         <div className={css.content}>
           <Outlet />

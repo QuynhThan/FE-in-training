@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 const Sidebar = () => {
   return (
     <div className={css.container}>
-      <img src="./logo.png" alt="logo" className={css.logo} />
+      <img src="./logo-ptit.png" alt="logo" className={css.logo} />
 
       <div className={css.menu}>
         <NavLink to="dashboard" className={css.item} title={"Dashboard"}>
@@ -21,7 +21,7 @@ const Sidebar = () => {
           <FaTasks size={30} />
         </NavLink>
 
-        <NavLink to="users" className={css.item} title="Users">
+        <NavLink to="subjects" className={css.item} title="Subjects">
           <AiOutlineTable size={30} />
         </NavLink>
       </div>

@@ -65,35 +65,36 @@ let todayStr = moment().format("YYYY-MM-DD")  // YYYY-MM-DD of today
 export const INITIAL_EVENTS = [
   {
     id: createEventId(),
-    title: 'Lunch Pary',
-    start: todayStr + 'T09:00:00',
-
+    title: 'Toán cao cấp \nPhòng: A001\nGV: Huỳnh Trọng Thưa',
+    start: todayStr + 'T08:00:00',
+    end: todayStr + 'T11:00:00'
   },
   {
     id: createEventId(),
-    title: 'Timed event',
-    start: moment(todayStr).add(1, "days").format("YYYY-MM-DD") + 'T16:00:00'
+    title: 'Cấu trúc dữ liệu & giải thuật\nPhòng: B002 \nGV: Dương Thanh Thảo',
+    start: moment(todayStr).add(1, "days").format("YYYY-MM-DD") + 'T13:30:00',
+    end: moment(todayStr).add(1, "days").format("YYYY-MM-DD") + 'T16:30:00'
   },
-  {
-    id: createEventId(),
-    title: "Head Meetup",
-    start: moment(todayStr).add(2, "days").format("YYYY-MM-DD") + 'T20:00:00'
-  },
-  {
-    id: createEventId(),
-    title: "VC Meeting",
-    start: moment(todayStr).add(3, "days").format("YYYY-MM-DD") + 'T09:00:00'
-  },
-  {
-    id: createEventId(),
-    title: "Payment Shedules",
-    start: moment(todayStr).add(5, "days").format("YYYY-MM-DD") + 'T13:00:00'
-  },
-  {
-    id: createEventId(),
-    title: "VC Meeting",
-    start: moment(todayStr).add(6, "days").format("YYYY-MM-DD") + 'T13:00:00'
-  },
+  // {
+  //   id: createEventId(),
+  //   title: "Head Meetup",
+  //   start: moment(todayStr).add(2, "days").format("YYYY-MM-DD") + 'T20:00:00'
+  // },
+  // {
+  //   id: createEventId(),
+  //   title: "VC Meeting",
+  //   start: moment(todayStr).add(3, "days").format("YYYY-MM-DD") + 'T09:00:00'
+  // },
+  // {
+  //   id: createEventId(),
+  //   title: "Payment Shedules",
+  //   start: moment(todayStr).add(5, "days").format("YYYY-MM-DD") + 'T13:00:00'
+  // },
+  // {
+  //   id: createEventId(),
+  //   title: "VC Meeting",
+  //   start: moment(todayStr).add(6, "days").format("YYYY-MM-DD") + 'T13:00:00'
+  // },
 ]
 
 export function createEventId() {

@@ -1,13 +1,13 @@
 :root {
   --transparent-black: rgba(0, 0, 0, 0.294);
-  --black: #6c6c6c;
+  --black: #ffffff;
   --grey: rgba(255, 255, 255, 0.597);
-  --orange: #ff805d;
-  --green: rgb(54, 234, 54);
+  --orange: #888888;
+  --green: rgb(90, 90, 90);
   --orange-gradient: linear-gradient(
     268.35deg,
-    rgba(255, 70, 70, 0.99) 3.47%,
-    rgba(255, 114, 70, 0.99) 60.18%
+    rgba(116, 116, 116, 0.99) 3.47%,
+    rgba(42, 37, 36, 0.99) 60.18%
   );
 }
 
@@ -38,7 +38,7 @@ body {
   position: absolute;
   width: 200px;
   height: 200px;
-  background: #ff5d5d;
+  background: #8f8f8f;
   filter: blur(90px);
 }
 .gradient-orange {
@@ -52,7 +52,7 @@ body {
   position: absolute;
   width: 200px;
   height: 200px;
-  background: #5dc9ff;
+  background: #b7e8f8;
   filter: blur(90px);
 }
 
@@ -86,4 +86,8 @@ body {
 /* MY CUSTOM */
 .nav {
   position: fixed;
+}
+
+.h1 {
+  color: black;
 }

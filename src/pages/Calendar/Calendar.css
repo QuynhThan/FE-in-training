@@ -3,9 +3,11 @@
     width: 90%;
     padding: 0rem 5rem;
     max-width: 1100px;
+    color: black;
 }
 .fc-event{
-    background: var(--orange-gradient)!important;
+    background: rgba(251, 214, 146, 0.853)!important;
+    color: black;
 }
 .fc .fc-timegrid-slot{
     height: 2.5rem!important;
