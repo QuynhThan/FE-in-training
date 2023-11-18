@@ -82,7 +82,7 @@ export const {
   useGetSubjectsQuery,
   useGetProductDetailsQuery,
   useCreateProductMutation: useCreateSubjectMutation,
-  useUpdateProductMutation,
+  useUpdateProductMutation: useUpdateSubjectMutation,
   useUploadProductImageMutation,
   useDeleteProductMutation: useDeleteSubjectMutation,
   useCreateReviewMutation,

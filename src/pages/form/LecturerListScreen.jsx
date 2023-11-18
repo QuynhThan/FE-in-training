@@ -28,7 +28,7 @@ import {
   Tooltip,
 } from "@mui/material";
 
-const ProductListScreen = () => {
+const LecturerListScreen = () => {
   //
   const [subjectCode, setSubjectCode] = useState("");
   const subject = null;
@@ -57,7 +57,7 @@ const ProductListScreen = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (window.confirm("Are you sure you want to create a new subject?")) {
+    if (window.confirm("Are you sure you want to add a new lecturer?")) {
       try {
         const response = await createSubject({
           subjectCode,
@@ -68,42 +68,29 @@ const ProductListScreen = () => {
           academicYear,
           prerequisiteCode,
         }).unwrap();
-        toast.success("Subject Created");
+        toast.success("Lecturer Created");
         resetState();
-        // if (file) {
-        //   formData.append("files", file);
-        //   formData.append("productCode", response.productCode);
-        //   const res = await uploadProductImage(formData).unwrap();
-        //   setImage(res.imageData);
-        // }
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
-      // try {
-      //   const res = await uploadProductImage(formData).unwrap();
-      //   toast.success();
-      //   setImage(res.imageData);
-      // } catch (err) {
-      //   toast.error(err?.data?.message || err.error);
-      // }
       refetch();
-      navigate("/subjects");
+      navigate("/lecturers");
     }
   };
 
   const handleEditRow = async ({ values, table }) => {
-    if (window.confirm("Are you sure you want to edit this subject?")) {
+    if (window.confirm("Are you sure you want to edit this lecturer?")) {
       try {
         const response = await editSubject(values);
-        toast.success("Subject Edited");
-        window.confirm("Subject Edited SUCCESS");
+        toast.success("Lecturer Edited");
+        window.confirm("Lecturer Edited SUCCESS");
         resetState();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
-        window.confirm("Subject Edited FAILED");
+        window.confirm("Lecturer Edited FAILED");
       }
       refetch();
-      navigate("/subjects");
+      navigate("/lecturers");
     }
     table.setEditingRow(null);
   };
@@ -227,7 +214,7 @@ const ProductListScreen = () => {
       <div className="table-container">
         <Row className="align-items-center">
           <Col>
-            <h1 style={{ color: "black" }}>Môn học</h1>
+            <h1 style={{ color: "black" }}>Giảng viên</h1>
           </Col>
           {/* <Col className='text-end'>
           <Button className='my-3' onClick={createProductHandler}>
@@ -280,7 +267,7 @@ const ProductListScreen = () => {
                 paddingBottom: "20px",
               }}
             >
-              Tạo môn học
+              Thêm giảng viên
             </h1>
             {loadingCreate && <Loader />}
             {isLoading ? (
@@ -368,7 +355,7 @@ const ProductListScreen = () => {
                       sx={{ mb: 4 }}
                     />
                     <Button variant="outlined" color="secondary" type="submit">
-                      Tạo
+                      Thêm
                     </Button>
                   </form>
                   {/* <small>
@@ -385,4 +372,4 @@ const ProductListScreen = () => {
   );
 };
 
-export default ProductListScreen;
+export default LecturerListScreen;

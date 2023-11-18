@@ -24,6 +24,10 @@ const Sidebar = () => {
         <NavLink to="subjects" className={css.item} title="Subjects">
           <AiOutlineTable size={30} />
         </NavLink>
+
+        <NavLink to="lecturers" className={css.item} title="Lecturers">
+          <AiOutlineTable size={30} />
+        </NavLink>
       </div>
     </div>
   );
