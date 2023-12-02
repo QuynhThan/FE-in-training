@@ -7,6 +7,8 @@ import DataGrid from "./pages/DataGrid/DataGrid";
 import Orders from "./components/Orders/Orders";
 import Subjects from "./pages/form/SubjectListScreen";
 import Lecturers from "./pages/form/LecturerListScreen";
+import ClassCredit from "./pages/form/ClassCreditListScreen";
+import Classrooms from "./pages/form/ClassRoomListScreen";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Container } from "react-bootstrap";
@@ -42,6 +44,8 @@ const App = () => {
             <Route path="orders" element={<Orders />} />
             <Route path="subjects" element={<Subjects />} />
             <Route path="lecturers" element={<Lecturers />} />
+            <Route path="class-credit" element={<ClassCredit />} />
+            <Route path="classrooms" element={<Classrooms />} />
           </Route>
         </Routes>
       </BrowserRouter>

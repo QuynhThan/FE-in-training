@@ -5,12 +5,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import Message from "../../components/Old/Message";
 import Loader from "../../components/Old/Loader";
 import {
-  useGetSubjectsQuery,
-  useDeleteSubjectMutation,
-  useCreateSubjectMutation,
-  useUpdateSubjectMutation,
-  useUploadProductImageMutation,
-} from "../../slices/subjectsApiSlice";
+  useGetLecturersQuery,
+  useDeleteLecturersMutation,
+  useCreateLecturersMutation,
+  useUpdateLecturersMutation,
+  useUploadLecturersImageMutation,
+} from "../../slices/lecturerApiSlice";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import React, { useMemo } from "react";
@@ -28,45 +28,60 @@ import {
   Tooltip,
 } from "@mui/material";
 
+import { facultyData } from "../../data";
+
 const LecturerListScreen = () => {
   //
-  const [subjectCode, setSubjectCode] = useState("");
+  const [profileCode, setProfileCode] = useState("");
   const subject = null;
-  const [name, setName] = useState("");
-  const [creditNum, setCreditNum] = useState(0);
-  const [theoryNum, setTheoryNum] = useState(0);
-  const [practicalNum, setPracticalNum] = useState(0);
-  const [academicYear, setAcademicYear] = useState(0);
-  const [prerequisiteCode, setPrerequisite] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [gender, setGender] = useState(0);
+  const [DOB, setDOB] = useState(0);
+  const [phone, setPhone] = useState(0);
+  const [address, setAddress] = useState("");
+  const [qualification, setQualification] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
-
-  const [uploadProductImage, { isLoading: loadingUpload }] =
-    useUploadProductImageMutation();
 
   const navigate = useNavigate();
   const formData = new FormData();
 
   const resetState = () => {
-    setSubjectCode("");
-    setName("");
-    setCreditNum(0);
-    setTheoryNum(0);
-    setPracticalNum(0);
-    setAcademicYear(0);
-    setPrerequisite("");
+    setProfileCode("");
+    setFullName("");
+    setEmail("");
+    setGender(0);
+    setDOB(0);
+    setPhone(0);
+    setAddress("");
+    setUsername("");
+    setPassword("");
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (window.confirm("Are you sure you want to add a new lecturer?")) {
       try {
-        const response = await createSubject({
-          subjectCode,
-          name,
-          creditNum,
-          theoryNum,
-          practicalNum,
-          academicYear,
-          prerequisiteCode,
+        const response = await createLecturer({
+          faculty: {
+            facultyId: 1,
+            name: "KHOA CONG NGHE THONG TIN",
+            facultyCode: "CNTT",
+          },
+          profile: {
+            profileCode,
+            fullName,
+            DOB,
+            gender,
+            email,
+            phone,
+            address,
+          },
+          account: {
+            username,
+            password,
+          },
         }).unwrap();
         toast.success("Lecturer Created");
         resetState();
@@ -81,7 +96,7 @@ const LecturerListScreen = () => {
   const handleEditRow = async ({ values, table }) => {
     if (window.confirm("Are you sure you want to edit this lecturer?")) {
       try {
-        const response = await editSubject(values);
+        const response = await editLecturer(values);
         toast.success("Lecturer Edited");
         window.confirm("Lecturer Edited SUCCESS");
         resetState();
@@ -97,9 +112,9 @@ const LecturerListScreen = () => {
 
   useEffect(() => {
     if (subject) {
-      setSubjectCode(subject.productCode);
-      setName(subject.name);
-      setCreditNum(subject.price);
+      setProfileCode(subject.productCode);
+      setFullName(subject.name);
+      setEmail(subject.price);
       setImage(subject.image);
       setStatus(subject.status);
       setType(subject.type);
@@ -122,17 +137,17 @@ const LecturerListScreen = () => {
 
   const searchRequest = {};
 
-  const { data, isLoading, error, refetch } = useGetSubjectsQuery({
+  const { data, isLoading, error, refetch } = useGetLecturersQuery({
     searchRequest,
   });
 
-  const [deleteProduct, { isLoading: loadingDelete }] =
-    useDeleteSubjectMutation();
+  const [deleteLecturer, { isLoading: loadingDelete }] =
+    useDeleteLecturersMutation();
 
   const deleteHandler = async (subject) => {
     if (window.confirm("Are you sure")) {
       try {
-        await deleteProduct(subject);
+        await deleteLecturer(subject);
         refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
@@ -140,65 +155,34 @@ const LecturerListScreen = () => {
     }
   };
 
-  const [createSubject, { isLoading: loadingCreate }] =
-    useCreateSubjectMutation();
+  const [createLecturer, { isLoading: loadingCreate }] =
+    useCreateLecturersMutation();
 
-  const [editSubject, { isLoading: loadingEdit }] = useUpdateSubjectMutation();
+  const [editLecturer, { isLoading: loadingEdit }] =
+    useUpdateLecturersMutation();
 
   const columns = useMemo(() => [
     {
-      accessorKey: "subjectId",
+      accessorKey: "lecturerId",
       header: "ID",
       enableEditing: false,
+      size: 1,
     },
     {
-      accessorKey: "subjectCode",
-      header: "MÃ MH",
-      muiEditTextFieldProps: {
-        type: "text",
-        required: true,
-        error: !!validationErrors?.subjectCode,
-        helperText: validationErrors?.subjectCode,
-        //remove any previous validation errors when user focuses on the input
-        onFocus: () =>
-          setValidationErrors({
-            ...validationErrors,
-            subjectCode: undefined,
-          }),
-        //optionally add validation checking for onBlur or onChange
-      },
+      accessorKey: "faculty.name",
+      header: "KHOA",
     },
     {
-      accessorKey: "name",
+      accessorKey: "profile.profileCode",
+      header: "MA GV",
+    },
+    {
+      accessorKey: "profile.fullName",
       header: "TÊN",
-      muiEditTextFieldProps: {
-        type: "text",
-        required: true,
-        error: !!validationErrors?.name,
-        helperText: validationErrors?.name,
-        //remove any previous validation errors when user focuses on the input
-        onFocus: () =>
-          setValidationErrors({
-            ...validationErrors,
-            firstName: undefined,
-          }),
-      },
     },
     {
-      accessorKey: "creditNum", //normal accessorKey
-      header: "SỐ TÍN CHỈ",
-    },
-    {
-      accessorKey: "theoryNum",
-      header: "SỐ TIẾT LT",
-    },
-    {
-      accessorKey: "practicalNum",
-      header: "SỐ TIẾT TH",
-    },
-    {
-      accessorKey: "prerequisiteCode",
-      header: "MHTQ",
+      accessorKey: "profile.phone", //normal accessorKey
+      header: "SDT",
     },
   ]);
   const theme = useMemo(() =>
@@ -277,14 +261,14 @@ const LecturerListScreen = () => {
             ) : (
               <>
                 <>
-                  <form onSubmit={handleSubmit} action={<Link to="/login" />}>
+                  <form onSubmit={handleSubmit}>
                     <TextField
                       type="text"
                       variant="outlined"
                       color="secondary"
-                      label="MÃ MH"
-                      onChange={(e) => setSubjectCode(e.target.value)}
-                      value={subjectCode}
+                      label="MÃ GV"
+                      onChange={(e) => setProfileCode(e.target.value)}
+                      value={profileCode}
                       fullWidth
                       required
                       sx={{ mb: 4 }}
@@ -293,67 +277,105 @@ const LecturerListScreen = () => {
                       type="text"
                       variant="outlined"
                       color="secondary"
-                      label="TÊN"
-                      onChange={(e) => setName(e.target.value)}
-                      value={name}
+                      label="HỌ VÀ TÊN"
+                      onChange={(e) => setFullName(e.target.value)}
+                      value={fullName}
                       fullWidth
                       required
                       sx={{ mb: 4 }}
                     />
                     <TextField
-                      type="number"
+                      type="email"
                       variant="outlined"
                       color="secondary"
-                      label="SỐ TÍN CHỈ"
-                      onChange={(e) => setCreditNum(e.target.value)}
-                      value={creditNum}
+                      label="EMAIL"
+                      onChange={(e) => setEmail(e.target.value)}
+                      value={email}
                       fullWidth
                       required
                       sx={{ mb: 4 }}
                     />
                     <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
                       <TextField
-                        type="number"
+                        type="gender"
                         variant="outlined"
                         color="secondary"
-                        label="SỐ TIẾT LT"
-                        onChange={(e) => setTheoryNum(e.target.value)}
-                        value={theoryNum}
+                        label="GIỚI TÍNH"
+                        onChange={(e) => setGender(e.target.value)}
+                        value={gender}
                         fullWidth
                         required
                       />
                       <TextField
-                        type="number"
+                        type="date"
                         variant="outlined"
                         color="secondary"
-                        label="SỐ TIẾT TH"
-                        onChange={(e) => setPracticalNum(e.target.value)}
-                        value={practicalNum}
+                        label="NGÀY SINH"
+                        onChange={(e) => setDOB(e.target.value)}
+                        value={DOB}
                         fullWidth
                         required
                       />
                     </Stack>
+                    <Stack spacing={2} direction="row" sx={{}}>
+                      <TextField
+                        type="number"
+                        variant="outlined"
+                        color="secondary"
+                        label="SDT"
+                        onChange={(e) => setPhone(e.target.value)}
+                        value={phone}
+                        required
+                        fullWidth
+                        sx={{ mb: 4 }}
+                      />
+                      <TextField
+                        type="text"
+                        variant="outlined"
+                        color="secondary"
+                        label="CẤP ĐỘ"
+                        onChange={(e) => setQualification(e.target.value)}
+                        value={qualification}
+                        fullWidth
+                        sx={{ mb: 4 }}
+                      />
+                    </Stack>
 
-                    {/* <TextField
-                      type="number"
-                      variant="outlined"
-                      color="secondary"
-                      label="NĂM HỌC"
-                      onChange={(e) => setAcademicYear(e.target.value)}
-                      value={academicYear}
-                      fullWidth
-                      sx={{ mb: 4 }}
-                    /> */}
                     <TextField
                       type="text"
                       variant="outlined"
                       color="secondary"
-                      label="MÔN HỌC TIÊN QUYẾT"
-                      onChange={(e) => setPrerequisite(e.target.value)}
-                      value={prerequisiteCode}
+                      label="ĐỊA CHỈ"
+                      onChange={(e) => setAddress(e.target.value)}
+                      value={address}
                       fullWidth
                       sx={{ mb: 4 }}
                     />
+                    <Stack spacing={2} direction="row" sx={{}}>
+                      <TextField
+                        type="text"
+                        variant="outlined"
+                        color="secondary"
+                        label="USERNAME"
+                        onChange={(e) => setUsername(e.target.value)}
+                        value={username}
+                        fullWidth
+                        required
+                        sx={{ mb: 4 }}
+                      />
+                      <TextField
+                        type="password"
+                        variant="outlined"
+                        color="secondary"
+                        label="PASSWORD"
+                        onChange={(e) => setPassword(e.target.value)}
+                        value={password}
+                        fullWidth
+                        required
+                        sx={{ mb: 4 }}
+                      />
+                    </Stack>
+
                     <Button variant="outlined" color="secondary" type="submit">
                       Thêm
                     </Button>

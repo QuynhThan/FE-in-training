@@ -12,6 +12,15 @@ export const SUBJECTS_RETRIEVE = SUBJECTS_URL + '/retrieve';
 
 
 
+// LECTURER URL
+export const LECTURERS_URL = ROOT_ADMIN + '/lecturers-maintenance';
+
+
+// Classrooom URL
+export const CLASSROOM_URL = ROOT_ADMIN + '/classroom-maintenance';
+
+// Class Credit URL
+export const CLASS_CREDIT_URL = ROOT_ADMIN + '/class-credit-maintenance';
 
 
 export const USERS_URL = '/api/users';

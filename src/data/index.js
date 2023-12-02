@@ -166,7 +166,29 @@ export const boardData = {
     }
   ]
 }
-
+// * Faculty data
+export const facultyData = [
+  {
+    facultyId: 1,
+    name: 'KHOA CONG NGHE THONG TIN',
+    facultyCode: 'CNTT'
+  },
+  {
+    facultyId: 2,
+    name: 'KHOA QUAN TRI KINH DOANH',
+    facultyCode: 'QTKD'
+  },
+  {
+    facultyId: 3,
+    name: 'KHOA VIEN THONG',
+    facultyCode: 'VT'
+  },
+  {
+    facultyId: 4,
+    name: 'KHOA KY THUAT DIEN TU',
+    facultyCode: 'KTDT'
+  },
+]
 
 // * user table data
 export const userData = [
