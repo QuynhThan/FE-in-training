@@ -11,6 +11,13 @@ import {
   useUpdateSubjectMutation,
   useUploadProductImageMutation,
 } from "../../slices/subjectsApiSlice";
+import {
+  useGetLecturersQuery,
+  useDeleteLecturersMutation,
+  useCreateLecturersMutation,
+  useUpdateLecturersMutation,
+  useUploadLecturersImageMutation,
+} from "../../slices/lecturerApiSlice";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import React, { useMemo } from "react";
@@ -19,6 +26,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import MaterialReactTable from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
+import "../../App.css";
+import { MultiSelectComponent } from "@syncfusion/ej2-react-dropdowns";
 import {
   TextField,
   Button,
@@ -27,6 +36,7 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 
 const ProductListScreen = () => {
   //
@@ -39,7 +49,8 @@ const ProductListScreen = () => {
   const [academicYear, setAcademicYear] = useState(0);
   const [prerequisiteCode, setPrerequisite] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
-
+  const [listGV, setListGV] = useState([]);
+  const [allGV, setAllGV] = useState([]);
   const [uploadProductImage, { isLoading: loadingUpload }] =
     useUploadProductImageMutation();
 
@@ -54,19 +65,22 @@ const ProductListScreen = () => {
     setPracticalNum(0);
     setAcademicYear(0);
     setPrerequisite("");
+    setListGV([]);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (window.confirm("Are you sure you want to create a new subject?")) {
+    if (window.confirm("Are you sure?")) {
       try {
         const response = await createSubject({
           subjectCode,
-          name,
-          creditNum,
-          theoryNum,
-          practicalNum,
-          academicYear,
-          prerequisiteCode,
+          // name,
+          // creditNum,
+          // theoryNum,
+          // practicalNum,
+          // academicYear,
+          // prerequisiteCode,
+          listGV,
+          phanMon: true,
         }).unwrap();
         toast.success("Subject Created");
         resetState();
@@ -87,7 +101,7 @@ const ProductListScreen = () => {
       //   toast.error(err?.data?.message || err.error);
       // }
       refetch();
-      navigate("/subjects");
+      navigate("/phan-mon");
     }
   };
 
@@ -138,7 +152,14 @@ const ProductListScreen = () => {
   const { data, isLoading, error, refetch } = useGetSubjectsQuery({
     searchRequest,
   });
-
+  const {
+    data: gvData,
+    isLoading: gvIsLoading,
+    error: gvError,
+    refetch: gvRefetch,
+  } = useGetLecturersQuery({
+    searchRequest,
+  });
   const [deleteProduct, { isLoading: loadingDelete }] =
     useDeleteSubjectMutation();
 
@@ -150,6 +171,19 @@ const ProductListScreen = () => {
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
+    }
+  };
+
+  const editHandler = async (subject) => {
+    try {
+      setSubjectCode(subject?.subjectCode);
+      setName(subject?.name);
+      setListGV(subject?.listGV);
+      // setListGV(["GV 1"]);
+      setAllGV(["GV 1", "GV 2", "GV 3"]);
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
     }
   };
 
@@ -197,21 +231,14 @@ const ProductListScreen = () => {
           }),
       },
     },
-    {
-      accessorKey: "creditNum", //normal accessorKey
-      header: "SỐ TÍN CHỈ",
-    },
-    {
-      accessorKey: "theoryNum",
-      header: "SỐ TIẾT LT",
-    },
-    {
-      accessorKey: "practicalNum",
-      header: "SỐ TIẾT TH",
-    },
+
     {
       accessorKey: "prerequisiteCode",
       header: "MHTQ",
+    },
+    {
+      accessorKey: "listGVStr",
+      header: "DS GV",
     },
   ]);
   const theme = useMemo(() =>
@@ -227,7 +254,7 @@ const ProductListScreen = () => {
       <div className="table-container">
         <Row className="align-items-center">
           <Col>
-            <h1 style={{ color: "black" }}>Môn học</h1>
+            <h1 style={{ color: "black" }}>Phân môn</h1>
           </Col>
           {/* <Col className='text-end'>
           <Button className='my-3' onClick={createProductHandler}>
@@ -249,7 +276,7 @@ const ProductListScreen = () => {
                 columns={columns}
                 data={data}
                 enableRowActions
-                enableEditing
+                // enableEditing
                 onEditingRowCancel={() => setValidationErrors({})}
                 onEditingRowSave={handleEditRow}
                 renderRowActionMenuItems={({ row }) => (
@@ -263,9 +290,9 @@ const ProductListScreen = () => {
                       <IconButton
                         variant="danger"
                         color="error"
-                        onClick={() => deleteHandler(row.original)}
+                        onClick={() => editHandler(row.original)}
                       >
-                        <DeleteIcon />
+                        <Edit />
                       </IconButton>
                     </Tooltip>
                   </Box>
@@ -280,7 +307,7 @@ const ProductListScreen = () => {
                 paddingBottom: "20px",
               }}
             >
-              Tạo môn học
+              Phân môn học
             </h1>
             {loadingCreate && <Loader />}
             {isLoading ? (
@@ -299,6 +326,7 @@ const ProductListScreen = () => {
                       onChange={(e) => setSubjectCode(e.target.value)}
                       value={subjectCode}
                       fullWidth
+                      // disabled
                       required
                       sx={{ mb: 4 }}
                     />
@@ -307,74 +335,31 @@ const ProductListScreen = () => {
                       variant="outlined"
                       color="secondary"
                       label="TÊN"
+                      disabled
                       onChange={(e) => setName(e.target.value)}
                       value={name}
                       fullWidth
                       required
                       sx={{ mb: 4 }}
                     />
-                    <TextField
-                      type="number"
+                    <MultiSelectComponent
+                      {...listGV}
+                      value={listGV}
+                      placeholder="Chọn Giảng Viên"
+                      dataSource={gvData}
+                      onChange={(e) => setListGV(e.value)}
+                      fields={{ value: "lecturerId", text: "profile.fullName" }}
+                      popupHeight="200"
+                    ></MultiSelectComponent>
+                    <Button
                       variant="outlined"
                       color="secondary"
-                      label="SỐ TÍN CHỈ"
-                      onChange={(e) => setCreditNum(e.target.value)}
-                      value={creditNum}
-                      fullWidth
-                      required
-                      sx={{ mb: 4 }}
-                    />
-                    <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="SỐ TIẾT LT"
-                        onChange={(e) => setTheoryNum(e.target.value)}
-                        value={theoryNum}
-                        fullWidth
-                        required
-                      />
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="SỐ TIẾT TH"
-                        onChange={(e) => setPracticalNum(e.target.value)}
-                        value={practicalNum}
-                        fullWidth
-                        required
-                      />
-                    </Stack>
-
-                    {/* <TextField
-                      type="number"
-                      variant="outlined"
-                      color="secondary"
-                      label="NĂM HỌC"
-                      onChange={(e) => setAcademicYear(e.target.value)}
-                      value={academicYear}
-                      fullWidth
-                      sx={{ mb: 4 }}
-                    /> */}
-                    <TextField
-                      type="text"
-                      variant="outlined"
-                      color="secondary"
-                      label="MÔN HỌC TIÊN QUYẾT"
-                      onChange={(e) => setPrerequisite(e.target.value)}
-                      value={prerequisiteCode}
-                      fullWidth
-                      sx={{ mb: 4 }}
-                    />
-                    <Button variant="outlined" color="secondary" type="submit">
+                      type="submit"
+                      style={{ marginTop: "20px" }}
+                    >
                       Tạo
                     </Button>
                   </form>
-                  {/* <small>
-                      Already have an account?{" "}
-                      <Link to="/login">Login Here</Link>
-                    </small> */}
                 </>
               </>
             )}

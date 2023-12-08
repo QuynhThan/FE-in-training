@@ -9,6 +9,9 @@ import Subjects from "./pages/form/SubjectListScreen";
 import Lecturers from "./pages/form/LecturerListScreen";
 import ClassCredit from "./pages/form/ClassCreditListScreen";
 import Classrooms from "./pages/form/ClassRoomListScreen";
+import ClassCreditRegistration from "./pages/form/ClassCreditRegistrationListScreen";
+import SignIn from "./pages/User/SignIn";
+import PhanMonListScreen from "./pages/form/PhanMonListScreen";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Container } from "react-bootstrap";
@@ -16,9 +19,10 @@ import { Outlet } from "react-router-dom";
 // import Header from './components/Old/Header';
 // import Footer from './components/Old/Footer';
 import { logout } from "./slices/authSlice";
-
+import "./App.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LoginScreen from "./pages/User/LoginScreen";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -33,7 +37,7 @@ const App = () => {
   //   }
   // }, [dispatch]);
   return (
-    <div id="dashboard">
+    <div id="login">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -45,7 +49,14 @@ const App = () => {
             <Route path="subjects" element={<Subjects />} />
             <Route path="lecturers" element={<Lecturers />} />
             <Route path="class-credit" element={<ClassCredit />} />
+            <Route
+              path="class-credit-registration"
+              element={<ClassCreditRegistration />}
+            />
             <Route path="classrooms" element={<Classrooms />} />
+            <Route path="login" element={<SignIn />} />
+            <Route path="sign-in" element={<LoginScreen />} />
+            <Route path="phan-mon" element={<PhanMonListScreen />} />
           </Route>
         </Routes>
       </BrowserRouter>
