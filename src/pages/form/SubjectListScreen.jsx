@@ -26,9 +26,40 @@ import {
   Box,
   IconButton,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
+import { useSelector } from "react-redux";
+import { useLogoutMutation } from "../../slices/usersApiSlice";
+import { useDispatch } from "react-redux";
+import { logout } from "../../slices/authSlice";
+import ToastServive from "react-material-toast";
 
 const ProductListScreen = () => {
+  const toast = ToastServive.new({
+    place: "topRight",
+    duration: 2,
+    maxCount: 8,
+  });
+  const { userInfo } = useSelector((state) => state.auth);
+  const [logoutApiCall] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const logoutHandler = async () => {
+    try {
+      await logoutApiCall().unwrap();
+      dispatch(logout());
+      // NOTE: here we need to reset cart state for when a user logs out so the next
+      // user doesn't inherit the previous users cart and shipping
+      // dispatch(resetCart());
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    if (!userInfo || userInfo.role === "student") {
+      logoutHandler();
+    }
+  }, []);
   //
   const [subjectCode, setSubjectCode] = useState("");
   const subject = null;
@@ -163,10 +194,12 @@ const ProductListScreen = () => {
       accessorKey: "subjectId",
       header: "ID",
       enableEditing: false,
+      size: 20,
     },
     {
       accessorKey: "subjectCode",
       header: "MÃ MH",
+      size: 50,
       muiEditTextFieldProps: {
         type: "text",
         required: true,
@@ -184,6 +217,7 @@ const ProductListScreen = () => {
     {
       accessorKey: "name",
       header: "TÊN",
+      size: 200,
       muiEditTextFieldProps: {
         type: "text",
         required: true,
@@ -200,18 +234,22 @@ const ProductListScreen = () => {
     {
       accessorKey: "creditNum", //normal accessorKey
       header: "SỐ TÍN CHỈ",
+      size: 10,
     },
     {
       accessorKey: "theoryNum",
       header: "SỐ TIẾT LT",
+      size: 10,
     },
     {
       accessorKey: "practicalNum",
+      size: 10,
       header: "SỐ TIẾT TH",
     },
     {
       accessorKey: "prerequisiteCode",
       header: "MHTQ",
+      size: 20,
     },
   ]);
   const theme = useMemo(() =>
@@ -358,7 +396,7 @@ const ProductListScreen = () => {
                       sx={{ mb: 4 }}
                     /> */}
                     <TextField
-                      type="text"
+                      select
                       variant="outlined"
                       color="secondary"
                       label="MÔN HỌC TIÊN QUYẾT"
@@ -366,7 +404,13 @@ const ProductListScreen = () => {
                       value={prerequisiteCode}
                       fullWidth
                       sx={{ mb: 4 }}
-                    />
+                    >
+                      {data?.map((subject) => (
+                        <MenuItem value={subject.subjectCode}>
+                          {subject.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                     <Button variant="outlined" color="secondary" type="submit">
                       Tạo
                     </Button>

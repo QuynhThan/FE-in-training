@@ -1,103 +1,95 @@
-import { CLASS_CREDIT_URL } from '../constants';
+import { TIMETABLE_SUBMIT } from '../constants';
 import { apiSlice } from './apiSlice';
 
-const searchRequest = {
-  filters: [
-    {
-      key: "status",
-      operator: "EQUAL",
-      fieldType: "STRING",
-      value: "INACTIVE",
-      valueTo: {},
-      values: [{}],
-    },
-  ],
-};
+const searchRequest = {};
 
-export const LecturersApiSlice = apiSlice.injectEndpoints({
+export const TimetableApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getClassCredits: builder.query({ 
-      query: (search ) => ({
-        url: `${CLASS_CREDIT_URL}/retrieve`,
+    getTimetables: builder.query({ 
+      query: ({ search }) => ({
+        url: `${TIMETABLE_SUBMIT}/submit`,
         method: 'POST', 
         body: search
         // params: { keyword, pageNumber },
       }),
       // keepUnusedDataFor: 5,
-      invalidatesTags: ['Lecturers'],
+      providesTags: ['Lecturers'],
     }),
-    getClassCreditsDetails: builder.query({
-      query: (productId) => ({
-        url: `${CLASS_CREDIT_URL}/retrieve/${productId}`,
+    getTimetablesDetails: builder.query({
+      query: ({ search }) => ({
+        url: `${TIMETABLE_SUBMIT}/retrieve`,
+        method: 'POST', 
+        body: search
+        // params: { keyword, pageNumber },
       }),
       keepUnusedDataFor: 5,
     }),
-    createClassCredits: builder.mutation({
+    submitTimetable: builder.mutation({
       query: (data) => ({
-        url: `${CLASS_CREDIT_URL}/add`,
+        url: `${TIMETABLE_SUBMIT}/submit`,
         method: 'POST',
         body: data
       }),
-      invalidatesTags: ['Lecturers'],
+      invalidatesTags: ['Timetable'],
     }),
     updateClassCredits: builder.mutation({
       query: (data) => ({
-        url: `${CLASS_CREDIT_URL}/update`,
+        url: `${TIMETABLE_SUBMIT}/update`,
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Lecturers'],
     }),
-    retrieveCC: builder.mutation({
+    uploadClassCreditsImage: builder.mutation({
       query: (data) => ({
-        url: `${CLASS_CREDIT_URL}/retrieve`,
+        url: `${TIMETABLE_SUBMIT}/update-image`,
         method: 'POST',
         body: data,
       }),
     }),
     deleteClassCredits: builder.mutation({
       query: (subject) => ({
-        url: `${CLASS_CREDIT_URL}/delete`,
+        url: `${TIMETABLE_SUBMIT}/delete`,
         method: 'POST',
         body: subject
       }),
       providesTags: ['Lecturers'],
     }),
-    createReview: builder.mutation({
+    save: builder.mutation({
       query: (data) => ({
-        url: `${CLASS_CREDIT_URL}/${data.productId}/reviews`,
+        url: `${TIMETABLE_SUBMIT}/save`,
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Lecturers'],
     }),
     getTopProducts: builder.query({
-      query: () => `${CLASS_CREDIT_URL}/top`, 
+      query: () => `${TIMETABLE_SUBMIT}/top`, 
       keepUnusedDataFor: 5,
     }),
     getInvalidProducts: builder.query({
       query: ({ keyword, pageNumber, field }) => ({
-        url: `${CLASS_CREDIT_URL}/retrieve`,
+        url: `${TIMETABLE_SUBMIT}/retrieve`,
         params: { keyword, pageNumber, field },
       }),
       keepUnusedDataFor: 5,
       providesTags: ['Lecturers'],
     }),
     getFilter: builder.query({
-      query: () => `${CLASS_CREDIT_URL}/filters`,
+      query: () => `${TIMETABLE_SUBMIT}/filters`,
     }),
   }),
 });
 
 export const {
-  useGetClassCreditsQuery,
-  useGetClassCreditsDetailsQuery,
-  useCreateClassCreditsMutation,
+  useGetTimetablesQuery,
+  useGetTimetablesDetailsQuery,
+  useSubmitTimetableMutation,
   useUpdateClassCreditsMutation,
-  useRetrieveCCMutation,
+  useUploadClassCreditsImageMutation,
   useDeleteClassCreditsMutation,
-  useCreateReviewMutation,
+  useSaveMutation,
   useGetTopProductsQuery,
   useGetInvalidProductsQuery,
   useGetFilterQuery,
-} = LecturersApiSlice;
+} = TimetableApiSlice;

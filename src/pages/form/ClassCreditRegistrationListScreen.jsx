@@ -36,8 +36,38 @@ import { useGetSubjectsQuery } from "../../slices/subjectsApiSlice";
 import { useGetClassroomsQuery } from "../../slices/classroomApiSlice";
 import { useGetLecturersQuery } from "../../slices/lecturerApiSlice";
 import { AiOutlineSearch } from "react-icons/ai";
+import { useSelector } from "react-redux";
+import { useLogoutMutation } from "../../slices/usersApiSlice";
+import { useDispatch } from "react-redux";
+import { logout } from "../../slices/authSlice";
+import ToastServive from "react-material-toast";
 
 const LecturerListScreen = () => {
+  const toast = ToastServive.new({
+    place: "topRight",
+    duration: 2,
+    maxCount: 8,
+  });
+  const { userInfo } = useSelector((state) => state.auth);
+  const [logoutApiCall] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const logoutHandler = async () => {
+    try {
+      await logoutApiCall().unwrap();
+      dispatch(logout());
+      // NOTE: here we need to reset cart state for when a user logs out so the next
+      // user doesn't inherit the previous users cart and shipping
+      // dispatch(resetCart());
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    if (!userInfo || userInfo.role !== "student") {
+      logoutHandler();
+    }
+  }, []);
   //
   // const [profileCode, setProfileCode] = useState("");
   const classCredit = null;

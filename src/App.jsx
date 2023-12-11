@@ -12,6 +12,7 @@ import Classrooms from "./pages/form/ClassRoomListScreen";
 import ClassCreditRegistration from "./pages/form/ClassCreditRegistrationListScreen";
 import SignIn from "./pages/User/SignIn";
 import PhanMonListScreen from "./pages/form/PhanMonListScreen";
+import ClassCreditBulkListScreen from "./pages/form/ClassCreditBulkListScreen";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Container } from "react-bootstrap";
@@ -57,6 +58,10 @@ const App = () => {
             <Route path="login" element={<SignIn />} />
             <Route path="sign-in" element={<LoginScreen />} />
             <Route path="phan-mon" element={<PhanMonListScreen />} />
+            <Route
+              path="class-credit-bulk"
+              element={<ClassCreditBulkListScreen />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>

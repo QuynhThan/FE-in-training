@@ -56,8 +56,8 @@ const Layout = () => {
             <div className={css.profile}>
               <img src="./avatar.jpg" alt="person image" />
               <div className={css.details}>
-                <span>Quỳnh Thân</span>
-                <span>N19DCCN154@gmail.com</span>
+                <span>{userInfo.profile?.fullName}</span>
+                <span>{userInfo.profile?.email}</span>
               </div>
               <IconButton
                 color="primary"

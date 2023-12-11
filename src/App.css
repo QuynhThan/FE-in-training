@@ -1,1 +1,18 @@
 @import url("https://cdn.syncfusion.com/ej2/bootstrap5.css");
+
+.e-multiselect.e-input-group .e-multi-select-wrapper {
+    min-height: 3rem;
+}
+
+.e-dropdownbase .e-list-item, .e-dropdownbase .e-list-item.e-item-focus {
+    font-size: large;
+}
+
+
+
+.e-multiselect .e-delim-values {
+    /* -webkit-text-fill-color: blue; */
+    font-size: 17px;
+    /* font-weight: bold; */
+}
+.fc-day-grid-event .fc-content{ white-space: normal!important; }

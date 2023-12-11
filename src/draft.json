@@ -1,0 +1,22 @@
+{
+    "filters": [
+      {
+        "key": "string",
+        "operator": "EQUAL",
+        "fieldType": "BOOLEAN",
+        "value": {},
+        "valueTo": {},
+        "values": [
+          {}
+        ]
+      }
+    ],
+    "sorts": [
+      {
+        "key": "string",
+        "direction": "ASC"
+      }
+    ],
+    "page": 0,
+    "size": 0
+  }

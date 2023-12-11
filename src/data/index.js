@@ -1,4 +1,5 @@
 import moment from "moment/moment";
+import { useSubmitTimetableMutation } from "../slices/timeTableApiSlice";
 
 export const cardsData = [
   {
@@ -62,6 +63,11 @@ export const groupNumber = (number) => {
 //* calendar Events
 let eventGuid = 0
 let todayStr = moment().format("YYYY-MM-DD")  // YYYY-MM-DD of today
+// const body = {};
+// const { data, isLoading } = useSubmitTimetableMutation({
+//   body,
+// });
+// export const TIMETABLE_DATA = data;
 export const INITIAL_EVENTS = [
   {
     id: createEventId(),

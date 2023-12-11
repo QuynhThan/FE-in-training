@@ -23,6 +23,12 @@ export const CLASSROOM_URL = ROOT_ADMIN + '/classroom-maintenance';
 export const CLASS_CREDIT_URL = ROOT_ADMIN + '/class-credit-maintenance';
 
 
+// TimeTable
+export const TIMETABLE_SUBMIT = ROOT_ADMIN + '/timetable';
+
+// student class
+export const STUDENT_CLASS = ROOT_ADMIN + '/student-class';
+
 export const USERS_URL = '/api/users';
 export const ORDERS_URL = '/api/orders';
 export const PAYPAL_URL = '/api/config/paypal';

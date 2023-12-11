@@ -27,13 +27,47 @@ import {
   Tooltip,
   MenuItem,
 } from "@mui/material";
+import ToastServive from "react-material-toast";
 
 import { facultyData } from "../../data";
 import { useGetSubjectsQuery } from "../../slices/subjectsApiSlice";
 import { useGetClassroomsQuery } from "../../slices/classroomApiSlice";
 import { useGetLecturersQuery } from "../../slices/lecturerApiSlice";
+import {
+  useGetTimetablesQuery,
+  useSubmitTimetableMutation,
+} from "../../slices/timeTableApiSlice";
+import { useSelector } from "react-redux";
+import { useLogoutMutation } from "../../slices/usersApiSlice";
+import { useDispatch } from "react-redux";
+import { logout } from "../../slices/authSlice";
 
 const LecturerListScreen = () => {
+  const { userInfo } = useSelector((state) => state.auth);
+  const [logoutApiCall] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const logoutHandler = async () => {
+    try {
+      await logoutApiCall().unwrap();
+      dispatch(logout());
+      // NOTE: here we need to reset cart state for when a user logs out so the next
+      // user doesn't inherit the previous users cart and shipping
+      // dispatch(resetCart());
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    if (!userInfo || userInfo.role === "student") {
+      logoutHandler();
+    }
+  }, []);
+  const toast = ToastServive.new({
+    place: "topRight",
+    duration: 2,
+    maxCount: 8,
+  });
   //
   // const [profileCode, setProfileCode] = useState("");
   const classCredit = null;
@@ -306,7 +340,7 @@ const LecturerListScreen = () => {
                         ))}
                       </TextField>
                     </Box>
-                    <TextField
+                    {/* <TextField
                       select
                       variant="outlined"
                       color="secondary"
@@ -322,8 +356,8 @@ const LecturerListScreen = () => {
                           {room.name} - {room.roomType} - {room.maxSize} SV
                         </MenuItem>
                       ))}
-                    </TextField>
-                    <TextField
+                    </TextField> */}
+                    {/* <TextField
                       select
                       variant="outlined"
                       color="secondary"
@@ -331,7 +365,6 @@ const LecturerListScreen = () => {
                       onChange={(e) => setLecturerId(e.target.value)}
                       value={lecturerId}
                       fullWidth
-                      required
                       sx={{ mb: 4 }}
                     >
                       {lecturers?.map((lecturer) => (
@@ -339,7 +372,7 @@ const LecturerListScreen = () => {
                           {lecturer.profile?.fullName}
                         </MenuItem>
                       ))}
-                    </TextField>
+                    </TextField> */}
                     <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
                       <TextField
                         type="date"

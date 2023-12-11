@@ -35,13 +35,44 @@ import {
   Box,
   IconButton,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { Edit } from "@mui/icons-material";
+import { useSelector } from "react-redux";
+import { useLogoutMutation } from "../../slices/usersApiSlice";
+import { useDispatch } from "react-redux";
+import { logout } from "../../slices/authSlice";
+import ToastServive from "react-material-toast";
 
 const ProductListScreen = () => {
+  const toast = ToastServive.new({
+    place: "topRight",
+    duration: 2,
+    maxCount: 8,
+  });
+  const { userInfo } = useSelector((state) => state.auth);
+  const [logoutApiCall] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const logoutHandler = async () => {
+    try {
+      await logoutApiCall().unwrap();
+      dispatch(logout());
+      // NOTE: here we need to reset cart state for when a user logs out so the next
+      // user doesn't inherit the previous users cart and shipping
+      // dispatch(resetCart());
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    if (!userInfo || userInfo.role !== "employee") {
+      logoutHandler();
+    }
+  }, []);
   //
-  const [subjectCode, setSubjectCode] = useState("");
-  const subject = null;
+  const [subjectCode, setSubjectCode] = useState(" ");
+  // const subject = null;
   const [name, setName] = useState("");
   const [creditNum, setCreditNum] = useState(0);
   const [theoryNum, setTheoryNum] = useState(0);
@@ -51,6 +82,7 @@ const ProductListScreen = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [listGV, setListGV] = useState([]);
   const [allGV, setAllGV] = useState([]);
+  const [subject, setSubject] = useState({});
   const [uploadProductImage, { isLoading: loadingUpload }] =
     useUploadProductImageMutation();
 
@@ -73,33 +105,14 @@ const ProductListScreen = () => {
       try {
         const response = await createSubject({
           subjectCode,
-          // name,
-          // creditNum,
-          // theoryNum,
-          // practicalNum,
-          // academicYear,
-          // prerequisiteCode,
           listGV,
           phanMon: true,
         }).unwrap();
         toast.success("Subject Created");
         resetState();
-        // if (file) {
-        //   formData.append("files", file);
-        //   formData.append("productCode", response.productCode);
-        //   const res = await uploadProductImage(formData).unwrap();
-        //   setImage(res.imageData);
-        // }
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
-      // try {
-      //   const res = await uploadProductImage(formData).unwrap();
-      //   toast.success();
-      //   setImage(res.imageData);
-      // } catch (err) {
-      //   toast.error(err?.data?.message || err.error);
-      // }
       refetch();
       navigate("/phan-mon");
     }
@@ -121,20 +134,6 @@ const ProductListScreen = () => {
     }
     table.setEditingRow(null);
   };
-
-  useEffect(() => {
-    if (subject) {
-      setSubjectCode(subject.productCode);
-      setName(subject.name);
-      setCreditNum(subject.price);
-      setImage(subject.image);
-      setStatus(subject.status);
-      setType(subject.type);
-      setSize(subject.size);
-      setCountInStock(subject.countInStock);
-      setDescription(subject.description);
-    }
-  }, [subject]);
 
   const uploadFileHandler = (e) => {
     var files = e.target.files;
@@ -197,10 +196,12 @@ const ProductListScreen = () => {
       accessorKey: "subjectId",
       header: "ID",
       enableEditing: false,
+      size: 20,
     },
     {
       accessorKey: "subjectCode",
       header: "MÃ MH",
+      size: 100,
       muiEditTextFieldProps: {
         type: "text",
         required: true,
@@ -218,6 +219,7 @@ const ProductListScreen = () => {
     {
       accessorKey: "name",
       header: "TÊN",
+      size: 300,
       muiEditTextFieldProps: {
         type: "text",
         required: true,
@@ -235,10 +237,12 @@ const ProductListScreen = () => {
     {
       accessorKey: "prerequisiteCode",
       header: "MHTQ",
+      size: 100,
     },
     {
       accessorKey: "listGVStr",
       header: "DS GV",
+      size: 200,
     },
   ]);
   const theme = useMemo(() =>
@@ -248,6 +252,13 @@ const ProductListScreen = () => {
       },
     })
   );
+  const handleSelectSubject = (key) => {
+    data.map((subject) => {
+      if (subject.subjectCode === key) {
+        editHandler(subject);
+      }
+    });
+  };
 
   return (
     <>
@@ -279,17 +290,12 @@ const ProductListScreen = () => {
                 // enableEditing
                 onEditingRowCancel={() => setValidationErrors({})}
                 onEditingRowSave={handleEditRow}
-                renderRowActionMenuItems={({ row }) => (
+                renderRowActions={({ row }) => (
                   <Box sx={{ display: "flex", gap: "1rem" }}>
-                    {/* <Tooltip title="Edit">
-                      <IconButton onClick={() => console.log(row)}>
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip> */}
-                    <Tooltip title="Delete">
+                    <Tooltip title="edit">
                       <IconButton
                         variant="danger"
-                        color="error"
+                        // color="error"
                         onClick={() => editHandler(row.original)}
                       >
                         <Edit />
@@ -326,22 +332,30 @@ const ProductListScreen = () => {
                       onChange={(e) => setSubjectCode(e.target.value)}
                       value={subjectCode}
                       fullWidth
-                      // disabled
+                      disabled
                       required
                       sx={{ mb: 4 }}
                     />
                     <TextField
-                      type="text"
+                      select
                       variant="outlined"
                       color="secondary"
                       label="TÊN"
-                      disabled
-                      onChange={(e) => setName(e.target.value)}
-                      value={name}
+                      // disabled
+                      onChange={(e) => {
+                        handleSelectSubject(e.target.value);
+                      }}
+                      value={subjectCode}
                       fullWidth
                       required
                       sx={{ mb: 4 }}
-                    />
+                    >
+                      {data?.map((subject) => (
+                        <MenuItem value={subject.subjectCode}>
+                          {subject.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                     <MultiSelectComponent
                       {...listGV}
                       value={listGV}
