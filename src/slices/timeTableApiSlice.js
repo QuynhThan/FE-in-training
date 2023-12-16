@@ -16,8 +16,9 @@ export const TimetableApiSlice = apiSlice.injectEndpoints({
       providesTags: ['Lecturers'],
     }),
     getTimetablesDetails: builder.query({
-      query: ({ search }) => ({
+      query: (search ) => ({
         url: `${TIMETABLE_SUBMIT}/retrieve`,
+        // params: { search },
         method: 'POST', 
         body: search
         // params: { keyword, pageNumber },
@@ -32,7 +33,7 @@ export const TimetableApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Timetable'],
     }),
-    updateClassCredits: builder.mutation({
+    updateTimeTables: builder.mutation({
       query: (data) => ({
         url: `${TIMETABLE_SUBMIT}/update`,
         method: 'POST',
@@ -40,14 +41,14 @@ export const TimetableApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Lecturers'],
     }),
-    uploadClassCreditsImage: builder.mutation({
+    uploadTimeTablesImage: builder.mutation({
       query: (data) => ({
         url: `${TIMETABLE_SUBMIT}/update-image`,
         method: 'POST',
         body: data,
       }),
     }),
-    deleteClassCredits: builder.mutation({
+    deleteTimeTables: builder.mutation({
       query: (subject) => ({
         url: `${TIMETABLE_SUBMIT}/delete`,
         method: 'POST',
@@ -85,9 +86,9 @@ export const {
   useGetTimetablesQuery,
   useGetTimetablesDetailsQuery,
   useSubmitTimetableMutation,
-  useUpdateClassCreditsMutation,
-  useUploadClassCreditsImageMutation,
-  useDeleteClassCreditsMutation,
+  useUpdateTimeTablesMutation,
+  useUploadTimeTablesImageMutation,
+  useDeleteTimeTablesMutation,
   useSaveMutation,
   useGetTopProductsQuery,
   useGetInvalidProductsQuery,

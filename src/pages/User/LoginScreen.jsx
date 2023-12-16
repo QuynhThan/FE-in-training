@@ -15,7 +15,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   const dispatch = useDispatch();

@@ -33,11 +33,12 @@ import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
 import ToastServive from "react-material-toast";
+import { useGetFacultysQuery } from "../../slices/facultysApiSlice";
 
 const ProductListScreen = () => {
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   const { userInfo } = useSelector((state) => state.auth);
@@ -64,6 +65,7 @@ const ProductListScreen = () => {
   const [subjectCode, setSubjectCode] = useState("");
   const subject = null;
   const [name, setName] = useState("");
+  const [khoa, setKhoa] = useState(0);
   const [creditNum, setCreditNum] = useState(0);
   const [theoryNum, setTheoryNum] = useState(0);
   const [practicalNum, setPracticalNum] = useState(0);
@@ -85,6 +87,7 @@ const ProductListScreen = () => {
     setPracticalNum(0);
     setAcademicYear(0);
     setPrerequisite("");
+    setKhoa(0);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,6 +101,7 @@ const ProductListScreen = () => {
           practicalNum,
           academicYear,
           prerequisiteCode,
+          khoa,
         }).unwrap();
         toast.success("Subject Created");
         resetState();
@@ -167,6 +171,13 @@ const ProductListScreen = () => {
   const searchRequest = {};
 
   const { data, isLoading, error, refetch } = useGetSubjectsQuery({
+    searchRequest,
+  });
+  const {
+    data: khoas,
+    isLoading: isLoadingKhoas,
+    error: errorKhoa,
+  } = useGetFacultysQuery({
     searchRequest,
   });
 
@@ -395,22 +406,41 @@ const ProductListScreen = () => {
                       fullWidth
                       sx={{ mb: 4 }}
                     /> */}
-                    <TextField
-                      select
-                      variant="outlined"
-                      color="secondary"
-                      label="MÔN HỌC TIÊN QUYẾT"
-                      onChange={(e) => setPrerequisite(e.target.value)}
-                      value={prerequisiteCode}
-                      fullWidth
-                      sx={{ mb: 4 }}
-                    >
-                      {data?.map((subject) => (
-                        <MenuItem value={subject.subjectCode}>
-                          {subject.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                    <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
+                      <TextField
+                        select
+                        variant="outlined"
+                        color="secondary"
+                        label="MÔN HỌC TIÊN QUYẾT"
+                        onChange={(e) => setPrerequisite(e.target.value)}
+                        value={prerequisiteCode}
+                        fullWidth
+                        sx={{ mb: 4 }}
+                      >
+                        {data?.map((subject) => (
+                          <MenuItem value={subject.subjectCode}>
+                            {subject.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      {/* <TextField
+                        select
+                        variant="outlined"
+                        color="secondary"
+                        label="KHOA"
+                        onChange={(e) => {
+                          setKhoa(e.target.value);
+                        }}
+                        value={khoa}
+                        fullWidth
+                        required
+                        sx={{ mb: 4 }}
+                      >
+                        {khoas?.map((k) => (
+                          <MenuItem value={k.facultyId}>{k.name}</MenuItem>
+                        ))}
+                      </TextField> */}
+                    </Stack>
                     <Button variant="outlined" color="secondary" type="submit">
                       Tạo
                     </Button>

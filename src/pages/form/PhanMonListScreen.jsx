@@ -47,7 +47,7 @@ import ToastServive from "react-material-toast";
 const ProductListScreen = () => {
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   const { userInfo } = useSelector((state) => state.auth);

@@ -6,7 +6,7 @@ const searchRequest = {};
 export const LecturersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getLecturers: builder.query({ 
-      query: ({ search }) => ({
+      query: ( search ) => ({
         url: `${LECTURERS_URL}/retrieve`,
         method: 'POST', 
         body: search

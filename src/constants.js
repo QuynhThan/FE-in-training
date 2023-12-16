@@ -4,7 +4,9 @@ export const BASE_URL = ''; // If using proxy
 export const LOCALHOST = 'http://localhost:8080/in-training';
 export const VERSION = '/v1';
 export const ADMIN = '/admin';
+export const USER = '/user';
 export const ROOT_ADMIN = LOCALHOST + VERSION + ADMIN;
+export const ROOT_USER = LOCALHOST + VERSION + USER;
 
 // subject URL
 export const SUBJECTS_URL = ROOT_ADMIN + '/subject-maintenance';
@@ -28,6 +30,11 @@ export const TIMETABLE_SUBMIT = ROOT_ADMIN + '/timetable';
 
 // student class
 export const STUDENT_CLASS = ROOT_ADMIN + '/student-class';
+
+// faculty
+export const FACULTY = ROOT_ADMIN + '/faculty-maintenance';
+
+// common
 
 export const USERS_URL = '/api/users';
 export const ORDERS_URL = '/api/orders';

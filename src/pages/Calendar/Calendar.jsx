@@ -37,7 +37,7 @@ import { logout } from "../../slices/authSlice";
 const Calendar = () => {
   const body = {};
   const classCredit = {};
-  const searchRequest = {};
+  const [searchRequest, setSearchRequest] = useState({});
   const { currentEvents, setCurrentEvents } = useCalendar();
   const [details, setDetails] = useState({});
   const [detailsArr, setDetailsArr] = useState([]);
@@ -58,9 +58,7 @@ const Calendar = () => {
     isLoading,
     error: tter,
     refetch: ttref,
-  } = useGetTimetablesDetailsQuery({
-    searchRequest,
-  });
+  } = useGetTimetablesDetailsQuery(searchRequest);
   const handleEvents = async (events) => {
     await Promise.resolve(setCurrentEvents(events));
   };
@@ -83,11 +81,19 @@ const Calendar = () => {
   };
 
   useEffect(() => {
-    console.log(userInfo);
+    // console.log(userInfo);
+
     if (!userInfo) {
       console.log("in side logout");
       logoutHandler();
     }
+    const rr = {};
+    if (userInfo && userInfo.userName) {
+      rr.userName = userInfo.userName;
+      rr.role = userInfo.role;
+      setSearchRequest(rr);
+    }
+
     if (classCredit) {
       // setSubjectId(classCredit.name);
       // setRoomId(classCredit.price);
@@ -144,7 +150,7 @@ const Calendar = () => {
             initialView="timeGridWeek"
             slotDuration={"00:30:00"}
             editable={false}
-            selectable={true}
+            selectable={false}
             selectMirror={true}
             dayMaxEvents={true}
             weekends={true}

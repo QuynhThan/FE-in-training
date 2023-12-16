@@ -37,7 +37,7 @@ import ToastServive from "react-material-toast";
 const LecturerListScreen = () => {
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   const { userInfo } = useSelector((state) => state.auth);
@@ -101,11 +101,9 @@ const LecturerListScreen = () => {
       try {
         const response = await editClassroom(values);
         toast.success("Classroom Edited");
-        window.confirm("Classroom Edited SUCCESS");
         resetState();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
-        window.confirm("Classroom Edited FAILED");
       }
       refetch();
       navigate("/classrooms");

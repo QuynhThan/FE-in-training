@@ -14,7 +14,7 @@ const searchRequest = {
   ],
 };
 
-export const LecturersApiSlice = apiSlice.injectEndpoints({
+export const ClassCreditsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getClassCredits: builder.query({ 
       query: (search ) => ({
@@ -43,7 +43,7 @@ export const LecturersApiSlice = apiSlice.injectEndpoints({
     updateClassCredits: builder.mutation({
       query: (data) => ({
         url: `${CLASS_CREDIT_URL}/update`,
-        method: 'POST',
+        method: 'POST',  
         body: data,
       }),
       invalidatesTags: ['Lecturers'],
@@ -100,4 +100,4 @@ export const {
   useGetTopProductsQuery,
   useGetInvalidProductsQuery,
   useGetFilterQuery,
-} = LecturersApiSlice;
+} = ClassCreditsApiSlice;

@@ -48,13 +48,15 @@ const Layout = () => {
         <div className={css.header}>
           <span>{moment().format("dddd, Do MMM YYYY")}</span>
 
+          {/* <span>PTIT IN-TRAININGs</span> */}
+
           {/* <div className={css.searchBar}>
             <BiSearch size={20} />
             <input type="text" placeholder="Search" />
           </div> */}
           {userInfo ? (
             <div className={css.profile}>
-              <img src="./avatar.jpg" alt="person image" />
+              <img src="./unknow_user.jpg" alt="person image" />
               <div className={css.details}>
                 <span>{userInfo.profile?.fullName}</span>
                 <span>{userInfo.profile?.email}</span>

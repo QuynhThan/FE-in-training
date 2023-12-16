@@ -43,6 +43,7 @@ import { MultiSelectComponent } from "@syncfusion/ej2-react-dropdowns";
 import CheckIcon from "@mui/icons-material/Check";
 import { dataTool } from "echarts";
 import "../../App.css";
+import "../Calendar/Calendar.css";
 import { useGetStudentClassQuery } from "../../slices/studentClassApiSlice";
 import {
   useSaveMutation,
@@ -61,6 +62,7 @@ import { useSelector } from "react-redux";
 import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
+import moment from "moment";
 const LecturerListScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [logoutApiCall] = useLogoutMutation();
@@ -85,7 +87,7 @@ const LecturerListScreen = () => {
 
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   //
@@ -113,7 +115,8 @@ const LecturerListScreen = () => {
   const [details, setDetails] = useState({});
   const [detailsArr, setDetailsArr] = useState([]);
   const { currentEvents, setCurrentEvents } = useCalendar();
-
+  const [startDates, setStartDates] = useState([]);
+  const [endDates, setEndDates] = useState([]);
   const resetState = () => {
     setSubjectId("");
     setRoomId("");
@@ -129,6 +132,8 @@ const LecturerListScreen = () => {
     setTimetable({});
     setIsTimetable(true);
     setIsTimetableSave(false);
+    setStartDates([]);
+    setEndDates([]);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -158,6 +163,8 @@ const LecturerListScreen = () => {
       const response = await saveTimeTable({
         timeTables: timetable,
         startDate,
+        startDates,
+        endDates,
       }).unwrap();
       toast.success("Thời khóa biểu được lưu!");
       // resetState();
@@ -182,22 +189,20 @@ const LecturerListScreen = () => {
     toast.success("Thời khóa biểu được lưu!");
   };
 
-  const handleEditRow = async ({ values, table }) => {
-    if (window.confirm("Are you sure you want to edit this Class credit?")) {
-      try {
-        const response = await editClassCredit(values);
-        toast.success("Class credit Edited");
-        window.confirm("class credit Edited SUCCESS");
-        resetState();
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-        window.confirm("Class credit Edited FAILED");
-      }
-      refetch();
-      navigate("/class-credit");
-    }
-    table.setEditingRow(null);
-  };
+  // const handleEditRow = async ({ values, table }) => {
+  //   if (window.confirm("Are you sure you want to edit this ?")) {
+  //     try {
+  //       const response = await editClassCredit(values);
+  //       toast.success(" Edited");
+  //       resetState();
+  //     } catch (err) {
+  //       toast.error(err?.data?.message || err.error);
+  //     }
+  //     refetch();
+  //     navigate("/class-credit");
+  //   }
+  //   table.setEditingRow(null);
+  // };
 
   useEffect(() => {
     if (classCredit) {
@@ -227,6 +232,7 @@ const LecturerListScreen = () => {
     openchange(true);
     setDetailsArr(events.event.title?.split("\r\n"));
     console.log(events.event.title?.split("\r\n"));
+    lsRefetch();
   };
   const closepopup = () => {
     openchange(false);
@@ -256,6 +262,13 @@ const LecturerListScreen = () => {
   });
   const { data: lecturers, isLoadingLecturers } = useGetLecturersQuery({
     searchRequest,
+  });
+  const {
+    data: lecturerSubjects,
+    isLoadingLecturerSubjects,
+    refetch: lsRefetch,
+  } = useGetLecturersQuery({
+    subjectId: details.extendedProps?.classCredit?.classCreditId,
   });
   const { data: studentClass, isLoadingStudentClass } = useGetStudentClassQuery(
     {
@@ -332,8 +345,40 @@ const LecturerListScreen = () => {
       header: "Trạng thái",
     },
   ]);
+  Object.defineProperties(timetable, [
+    {
+      end: {
+        writable: true,
+      },
+    },
+  ]);
+
   const handleEvents = async (events) => {
-    await Promise.resolve(setCurrentEvents(events));
+    console.log(events);
+    // const clone = [];
+
+    if (events) {
+      for (let i = 0; i < events.length; i++) {
+        const endD = moment(events[i]._instance.range.end).format(
+          "YYYY-MM-DDTHH:mm:ss"
+        );
+        const startD = moment(events[i]._instance.range.start).format(
+          "YYYY-MM-DDTHH:mm:ss"
+        );
+        startDates[i] = startD;
+        endDates[i] = endD;
+      }
+      // setTimetable(clone);
+    }
+
+    console.log("1232132");
+    console.log(startDates);
+
+    // var index = timeTable.findIndex((obj => obj.timeTableId == events));
+    // timeTable[index].end = events;
+    // timeTable[index].start = events;
+
+    // await Promise.resolve(setCurrentEvents(events));
   };
   const handleDateSelect = (selectInfo) => {
     let title = prompt("Please enter a title for the event");
@@ -398,33 +443,36 @@ const LecturerListScreen = () => {
           <>
             {isTimetable ? (
               <div>
-                <FullCalendar
-                  plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
-                  headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay",
-                  }}
-                  slotMinTime={"07:00:00"}
-                  slotMaxTime={"17:00:00"}
-                  eventTextColor="black"
-                  allDaySlot={false}
-                  initialView="timeGridWeek"
-                  slotDuration={"00:30:00"}
-                  editable={true}
-                  selectable={true}
-                  selectMirror={true}
-                  dayMaxEvents={true}
-                  weekends={true}
-                  nowIndicator={true}
-                  initialEvents={timetable}
-                  events={timetable}
-                  eventsSet={handleEvents}
-                  select={handleDateSelect}
-                  eventClick={functionopenpopup}
-                  contentHeight={500}
-                  eventBackgroundColor="black"
-                />
+                <div className="calendar-container">
+                  <FullCalendar
+                    plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+                    headerToolbar={{
+                      left: "prev,next today",
+                      center: "title",
+                      right: "dayGridMonth,timeGridWeek,timeGridDay",
+                    }}
+                    slotMinTime={"07:30:00"}
+                    slotMaxTime={"16:30:00"}
+                    eventTextColor="black"
+                    allDaySlot={false}
+                    initialView="timeGridWeek"
+                    slotDuration={"00:30:00"}
+                    editable={true}
+                    selectable={false}
+                    selectMirror={false}
+                    dayMaxEvents={true}
+                    weekends={true}
+                    nowIndicator={true}
+                    initialEvents={timetable}
+                    events={timetable}
+                    eventsSet={handleEvents}
+                    // select={handleDateSelect}
+                    eventClick={functionopenpopup}
+                    contentHeight={500}
+                    eventBackgroundColor="black"
+                  />
+                </div>
+
                 <div style={{ textAlign: "center" }}>
                   {/* <h1>MUI - DIALOG</h1>
         <Button onClick={functionopenpopup} color="primary" variant="contained">
@@ -465,13 +513,20 @@ const LecturerListScreen = () => {
                               editable="false"
                             ></TextField>
                             <TextField
+                              // select
                               value={
                                 details.extendedProps?.classCredit?.lecturer
                                   ?.profile?.fullName
                               }
                               label="Giảng viên"
                               editable="false"
-                            ></TextField>
+                            >
+                              {/* {lecturerSubjects?.map((lecturerSubject) => (
+                                <MenuItem value={lecturerSubject?.lecturerId}>
+                                  {lecturerSubject?.profile?.fullName}
+                                </MenuItem>
+                              ))} */}
+                            </TextField>
                             <TextField
                               value={dayjs(details.start).format(
                                 "dddd - DD/MM/YYYY HH:mm"
@@ -561,32 +616,6 @@ const LecturerListScreen = () => {
                   <form onSubmit={handleSubmit}>
                     {console.log(lecturers)}
                     <Box sx={{ mb: 4 }}>
-                      {/* <Autocomplete
-                        sx={{ m: 1, width: 500 }}
-                        multiple
-                        options={names}
-                        getOptionLabel={(option) => option}
-                        disableCloseOnSelect
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="outlined"
-                            label="Multiple Autocomplete"
-                            placeholder="Multiple Autocomplete"
-                          />
-                        )}
-                        renderOption={(props, option, { selected }) => (
-                          <MenuItem
-                            {...props}
-                            key={option}
-                            value={option}
-                            sx={{ justifyContent: "space-between" }}
-                          >
-                            {option}
-                            {selected ? <CheckIcon color="info" /> : null}
-                          </MenuItem>
-                        )}
-                      /> */}
                       <Stack
                         spacing={2}
                         direction="row"
@@ -618,37 +647,8 @@ const LecturerListScreen = () => {
                         popupHeight="200"
                       ></MultiSelectComponent>
                     </Box>
-                    {/* <TextField
-                      select
-                      variant="outlined"
-                      color="secondary"
-                      label="Phòng học"
-                      onChange={(e) => setRoomId(e.target.value)}
-                      value={roomId}
-                      fullWidth
-                      required
-                      sx={{ mb: 4 }}
-                    >
-                      {rooms?.map((room) => (
-                        <MenuItem value={room.classroomId}>
-                          {room.name} - {room.roomType} - {room.maxSize} SV
-                        </MenuItem>
-                      ))}
-                    </TextField> */}
 
                     <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
-                      <MultiSelectComponent
-                        {...listClass}
-                        value={listClass}
-                        placeholder="Lớp"
-                        dataSource={studentClass}
-                        onChange={(e) => setListClass(e.value)}
-                        fields={{
-                          value: "classId",
-                          text: "name",
-                        }}
-                        popupHeight="200"
-                      ></MultiSelectComponent>
                       <TextField
                         type="date"
                         variant="outlined"

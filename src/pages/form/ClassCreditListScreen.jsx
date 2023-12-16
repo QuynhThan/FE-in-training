@@ -28,24 +28,26 @@ import {
   MenuItem,
 } from "@mui/material";
 import ToastServive from "react-material-toast";
-
+import css from "./MultiSelect.css?inline";
+import "../../App.css";
 import { facultyData } from "../../data";
 import { useGetSubjectsQuery } from "../../slices/subjectsApiSlice";
 import { useGetClassroomsQuery } from "../../slices/classroomApiSlice";
 import { useGetLecturersQuery } from "../../slices/lecturerApiSlice";
-import {
-  useGetTimetablesQuery,
-  useSubmitTimetableMutation,
-} from "../../slices/timeTableApiSlice";
+
 import { useSelector } from "react-redux";
 import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
+import { MultiSelectComponent } from "@syncfusion/ej2-react-dropdowns";
+import { useGetStudentClassQuery } from "../../slices/studentClassApiSlice";
 
 const LecturerListScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [logoutApiCall] = useLogoutMutation();
   const dispatch = useDispatch();
+  const [listClass, setListClass] = useState([]);
+
   const logoutHandler = async () => {
     try {
       await logoutApiCall().unwrap();
@@ -65,7 +67,7 @@ const LecturerListScreen = () => {
   }, []);
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   //
@@ -79,6 +81,7 @@ const LecturerListScreen = () => {
   const [year, setYear] = useState(0);
   const [semesterNo, setSemesterNo] = useState(0);
   const [minSize, setMinSize] = useState(0);
+  const [lopHoc, setLopHoc] = useState(0);
   // const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -93,6 +96,8 @@ const LecturerListScreen = () => {
     setRegisClosing(0);
     setYear("");
     setMinSize(0);
+    setListClass([]);
+    setLopHoc(0);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,6 +112,8 @@ const LecturerListScreen = () => {
           year,
           semesterNo,
           minSize,
+          listClass,
+          lopHoc,
         }).unwrap();
         toast.success("Class Credit Created");
         resetState();
@@ -118,16 +125,15 @@ const LecturerListScreen = () => {
     }
   };
 
-  const handleEditRow = async ({ values, table }) => {
+  const handleEditRow1 = async ({ values, table }) => {
     if (window.confirm("Are you sure you want to edit this Class credit?")) {
       try {
-        const response = await editClassCredit(values);
+        const response = await editClassCredit(values).unwrap();
         toast.success("Class credit Edited");
-        window.confirm("class credit Edited SUCCESS");
         resetState();
+        refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
-        window.confirm("Class credit Edited FAILED");
       }
       refetch();
       navigate("/class-credit");
@@ -160,6 +166,11 @@ const LecturerListScreen = () => {
 
   const searchRequest = {};
 
+  const { data: studentClass, isLoadingStudentClass } = useGetStudentClassQuery(
+    {
+      searchRequest,
+    }
+  );
   const { data, isLoading, error, refetch } = useGetClassCreditsQuery({
     searchRequest,
   });
@@ -180,9 +191,10 @@ const LecturerListScreen = () => {
     useDeleteClassCreditsMutation();
 
   const deleteHandler = async (classCredit) => {
-    if (window.confirm("Are you sure")) {
+    if (window.confirm("Are you sure to delete")) {
       try {
-        await deleteClassCredit(classCredit);
+        const res = await deleteClassCredit(classCredit).unwrap();
+        toast.success("Xóa thành công");
         refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
@@ -274,7 +286,7 @@ const LecturerListScreen = () => {
                 enableRowActions
                 enableEditing
                 onEditingRowCancel={() => setValidationErrors({})}
-                onEditingRowSave={handleEditRow}
+                onEditingRowSave={handleEditRow1}
                 renderRowActionMenuItems={({ row }) => (
                   <Box sx={{ display: "flex", gap: "1rem" }}>
                     {/* <Tooltip title="Edit">
@@ -318,7 +330,7 @@ const LecturerListScreen = () => {
                 <>
                   <form onSubmit={handleSubmit}>
                     {console.log(lecturers)}
-                    <Box>
+                    <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
                       <TextField
                         select
                         variant="outlined"
@@ -339,7 +351,38 @@ const LecturerListScreen = () => {
                           </MenuItem>
                         ))}
                       </TextField>
-                    </Box>
+                      <TextField
+                        select
+                        variant="outlined"
+                        color="secondary"
+                        label="Lớp học"
+                        onChange={(e) => {
+                          setLopHoc(e.target.value);
+                          console.log(e.target.value);
+                        }}
+                        value={lopHoc}
+                        fullWidth
+                        required
+                        sx={{ mb: 4 }}
+                      >
+                        {studentClass?.map((x) => (
+                          <MenuItem value={x.classId}>{x.name}</MenuItem>
+                        ))}
+                      </TextField>
+                      {/* <MultiSelectComponent
+                        {...listClass}
+                        value={listClass}
+                        placeholder="Lớp"
+                        dataSource={studentClass}
+                        onChange={(e) => setListClass(e.value)}
+                        fields={{
+                          value: "classId",
+                          text: "name",
+                        }}
+                        required
+                        popupHeight="200"
+                      ></MultiSelectComponent> */}
+                    </Stack>
                     {/* <TextField
                       select
                       variant="outlined"

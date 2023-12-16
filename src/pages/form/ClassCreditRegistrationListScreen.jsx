@@ -17,7 +17,7 @@ import FormContainer from "../../components/Old/FormContainer";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import MaterialReactTable from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
-import "../../App.css";
+// import "../../App.css";
 import { MultiSelectComponent } from "@syncfusion/ej2-react-dropdowns";
 import { Link } from "react-router-dom";
 import {
@@ -41,11 +41,13 @@ import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
 import ToastServive from "react-material-toast";
+import { Add } from "@mui/icons-material";
+import { useRegisterSubmitMutation } from "../../slices/registerApiSlice";
 
 const LecturerListScreen = () => {
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   const { userInfo } = useSelector((state) => state.auth);
@@ -67,6 +69,9 @@ const LecturerListScreen = () => {
     if (!userInfo || userInfo.role !== "student") {
       logoutHandler();
     }
+    if (userInfo && userInfo.userName) {
+      setTenTk(userInfo.userName);
+    }
   }, []);
   //
   // const [profileCode, setProfileCode] = useState("");
@@ -82,6 +87,7 @@ const LecturerListScreen = () => {
   const [multiValue, setMultiValue] = useState([]);
   // const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+  const [tenTk, setTenTk] = useState("");
 
   const navigate = useNavigate();
   const formData = new FormData();
@@ -94,6 +100,7 @@ const LecturerListScreen = () => {
     setRegisClosing(0);
     setYear("");
     setMinSize(0);
+    setTenTk("");
   };
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -118,15 +125,13 @@ const LecturerListScreen = () => {
   };
 
   const handleEditRow = async ({ values, table }) => {
-    if (window.confirm("Are you sure you want to edit this Class credit?")) {
+    if (window.confirm("Are you sure ?")) {
       try {
         const response = await editClassCredit(values);
         toast.success("Class credit Edited");
-        window.confirm("class credit Edited SUCCESS");
         resetState();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
-        window.confirm("Class credit Edited FAILED");
       }
       refetch();
       navigate("/class-credit");
@@ -156,12 +161,46 @@ const LecturerListScreen = () => {
   };
   //
   const { pageNumber } = useParams();
-
   const searchRequest = {};
+  const searchCCRequest = {
+    userName: tenTk,
+    role: "student",
+    filters: [
+      {
+        key: "status",
+        operator: "EQUAL",
+        fieldType: "STRING",
+        value: "ACTIVE",
+        valueTo: {},
+        values: [{}],
+      },
+    ],
+  };
+  const searchHuyCCRequest = {
+    userName: userInfo.userName,
+    role: "student",
+    registered: "true",
+    filters: [
+      {
+        key: "status",
+        operator: "EQUAL",
+        fieldType: "STRING",
+        value: "ACTIVE",
+        valueTo: {},
+        values: [{}],
+      },
+    ],
+  };
 
-  const { data, isLoading, error, refetch } = useGetClassCreditsQuery({
-    searchRequest,
-  });
+  const { data, isLoading, error, refetch } =
+    useGetClassCreditsQuery(searchCCRequest);
+
+  const {
+    data: dataHuy,
+    isLoading: isLoadingHuy,
+    error: errorHuy,
+    refetch: refetchHuy,
+  } = useGetClassCreditsQuery(searchHuyCCRequest);
   const { data: rooms, isLoading: isLoadingRooms } = useGetClassroomsQuery({
     searchRequest,
   });
@@ -177,6 +216,9 @@ const LecturerListScreen = () => {
   });
   const [deleteClassCredit, { isLoading: loadingDelete }] =
     useDeleteClassCreditsMutation();
+
+  const [registerSubmit, { isLoading: loadingRegister }] =
+    useRegisterSubmitMutation();
 
   const deleteHandler = async (classCredit) => {
     if (window.confirm("Are you sure")) {
@@ -242,6 +284,42 @@ const LecturerListScreen = () => {
   );
   const yearData = ["2021", "2023"];
 
+  const dkMonHandle = async (ltc) => {
+    if (window.confirm("Are you sure")) {
+      try {
+        const response = await registerSubmit({
+          classCredit: ltc,
+          userName: userInfo.userName,
+          status: "true",
+        }).unwrap();
+        console.log(response);
+        refetch();
+        refetchHuy();
+        toast.success("Đăng ký thành công thành công!!");
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
+  };
+
+  const huyMonHandle = async (ltc) => {
+    if (window.confirm("Are you sure")) {
+      try {
+        const response = await registerSubmit({
+          classCredit: ltc,
+          userName: userInfo.userName,
+          status: "false",
+        }).unwrap();
+        refetch();
+        refetchHuy();
+
+        toast.success("Hủy thành công!!");
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
+  };
+
   return (
     <>
       <div className="table-container">
@@ -255,7 +333,7 @@ const LecturerListScreen = () => {
           </Button>
         </Col> */}
         </Row>
-        <form onSubmit={handleSearch}>
+        <form onSubmit={handleSearch} hidden>
           {console.log(lecturers)}
           <Stack spacing={3} direction="row" sx={{}}>
             <TextField
@@ -296,6 +374,7 @@ const LecturerListScreen = () => {
         {isLoading ||
         isLoadingSubjects ||
         isLoadingRooms ||
+        isLoadingHuy ||
         isLoadingLecturers ? (
           <Loader />
         ) : error ? (
@@ -307,23 +386,18 @@ const LecturerListScreen = () => {
                 columns={columns}
                 data={data}
                 enableRowActions
-                enableEditing
+                // enableEditing
                 onEditingRowCancel={() => setValidationErrors({})}
                 onEditingRowSave={handleEditRow}
-                renderRowActionMenuItems={({ row }) => (
+                renderRowActions={({ row }) => (
                   <Box sx={{ display: "flex", gap: "1rem" }}>
-                    {/* <Tooltip title="Edit">
-                      <IconButton onClick={() => console.log(row)}>
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip> */}
-                    <Tooltip title="Delete">
+                    <Tooltip title="Đăng ký">
                       <IconButton
                         variant="danger"
-                        color="error"
-                        onClick={() => deleteHandler(row.original)}
+                        // color="error"
+                        onClick={() => dkMonHandle(row.original)}
                       >
-                        <DeleteIcon />
+                        <Add />
                       </IconButton>
                     </Tooltip>
                   </Box>
@@ -338,7 +412,7 @@ const LecturerListScreen = () => {
                 paddingBottom: "20px",
               }}
             >
-              Đăng ký môn học
+              Hủy đăng ký
             </h1>
             {loadingCreate && <Loader />}
             {isLoadingSubjects ||
@@ -351,128 +425,29 @@ const LecturerListScreen = () => {
             ) : (
               <>
                 <>
-                  <form onSubmit={handleSearch}>
-                    {console.log(lecturers)}
-                    <Box>
-                      <TextField
-                        select
-                        variant="outlined"
-                        color="secondary"
-                        label="Môn học"
-                        onChange={(e) => {
-                          setSubjectId(e.target.value);
-                          console.log(e.target.value);
-                        }}
-                        value={subjectId}
-                        fullWidth
-                        required
-                        sx={{ mb: 4 }}
-                      >
-                        {subjects?.map((subject) => (
-                          <MenuItem value={subject.subjectId}>
-                            {subject.name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Box>
-                    <TextField
-                      select
-                      variant="outlined"
-                      color="secondary"
-                      label="Phòng học"
-                      onChange={(e) => setRoomId(e.target.value)}
-                      value={roomId}
-                      fullWidth
-                      required
-                      sx={{ mb: 4 }}
-                    >
-                      {rooms?.map((room) => (
-                        <MenuItem value={room.classroomId}>
-                          {room.name} - {room.roomType} - {room.maxSize} SV
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      select
-                      variant="outlined"
-                      color="secondary"
-                      label="Giảng viên"
-                      onChange={(e) => setLecturerId(e.target.value)}
-                      value={lecturerId}
-                      fullWidth
-                      required
-                      sx={{ mb: 4 }}
-                    >
-                      {lecturers?.map((lecturer) => (
-                        <MenuItem value={lecturer.lecturerId}>
-                          {lecturer.profile?.fullName}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
-                      <TextField
-                        type="date"
-                        variant="outlined"
-                        color="secondary"
-                        label="NGÀY MỞ ĐĂNG KÝ"
-                        onChange={(e) => setRegisOpening(e.target.value)}
-                        value={regisOpening}
-                        fullWidth
-                        required
-                      />
-                      <TextField
-                        type="date"
-                        variant="outlined"
-                        color="secondary"
-                        label="HẠN ĐĂNG KÝ"
-                        onChange={(e) => setRegisClosing(e.target.value)}
-                        value={regisClosing}
-                        fullWidth
-                        required
-                      />
-                    </Stack>
-                    <Stack spacing={3} direction="row" sx={{}}>
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="Số lượng tối thiểu"
-                        onChange={(e) => setMinSize(e.target.value)}
-                        value={minSize}
-                        required
-                        fullWidth
-                        sx={{ mb: 4 }}
-                      />
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="NĂM HỌC"
-                        onChange={(e) => setYear(e.target.value)}
-                        value={year}
-                        required
-                        fullWidth
-                        sx={{ mb: 4 }}
-                      />
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="HỌC KỲ"
-                        onChange={(e) => setSemesterNo(e.target.value)}
-                        value={semesterNo}
-                        fullWidth
-                        sx={{ mb: 4 }}
-                      />
-                    </Stack>
-                    <Button variant="outlined" color="secondary" type="submit">
-                      Thêm
-                    </Button>
-                  </form>
-                  {/* <small>
-                      Already have an account?{" "}
-                      <Link to="/login">Login Here</Link>
-                    </small> */}
+                  <ThemeProvider theme={theme}>
+                    <MaterialReactTable
+                      columns={columns}
+                      data={dataHuy}
+                      enableRowActions
+                      // enableEditing
+                      onEditingRowCancel={() => setValidationErrors({})}
+                      onEditingRowSave={handleEditRow}
+                      renderRowActions={({ row }) => (
+                        <Box sx={{ display: "flex", gap: "1rem" }}>
+                          <Tooltip title="Hủy">
+                            <IconButton
+                              variant="danger"
+                              // color="error"
+                              onClick={() => huyMonHandle(row.original)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      )}
+                    />
+                  </ThemeProvider>
                 </>
               </>
             )}

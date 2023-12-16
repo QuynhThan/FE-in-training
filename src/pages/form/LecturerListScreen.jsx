@@ -26,6 +26,7 @@ import {
   Box,
   IconButton,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 
 import { facultyData } from "../../data";
@@ -34,11 +35,12 @@ import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
 import ToastServive from "react-material-toast";
+import { useGetFacultysQuery } from "../../slices/facultysApiSlice";
 
 const LecturerListScreen = () => {
   const toast = ToastServive.new({
     place: "topRight",
-    duration: 2,
+    duration: 5,
     maxCount: 8,
   });
   const { userInfo } = useSelector((state) => state.auth);
@@ -74,6 +76,7 @@ const LecturerListScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+  const [khoa, setKhoa] = useState(0);
 
   const navigate = useNavigate();
   const formData = new FormData();
@@ -87,17 +90,17 @@ const LecturerListScreen = () => {
     setPhone(0);
     setAddress("");
     setUsername("");
+    setKhoa(0);
     setPassword("");
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (window.confirm("Are you sure you want to add a new lecturer?")) {
       try {
         const response = await createLecturer({
           faculty: {
-            facultyId: 1,
-            name: "KHOA CONG NGHE THONG TIN",
-            facultyCode: "CNTT",
+            facultyId: khoa,
           },
           profile: {
             profileCode,
@@ -126,13 +129,11 @@ const LecturerListScreen = () => {
   const handleEditRow = async ({ values, table }) => {
     if (window.confirm("Are you sure you want to edit this lecturer?")) {
       try {
+        console.log(values);
         const response = await editLecturer(values);
-        toast.success("Lecturer Edited");
-        window.confirm("Lecturer Edited SUCCESS");
         resetState();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
-        window.confirm("Lecturer Edited FAILED");
       }
       refetch();
       navigate("/lecturers");
@@ -170,6 +171,13 @@ const LecturerListScreen = () => {
   const { data, isLoading, error, refetch } = useGetLecturersQuery({
     searchRequest,
   });
+  const {
+    data: khoas,
+    isLoading: isLoadingKhoas,
+    error: errorKhoa,
+  } = useGetFacultysQuery({
+    searchRequest,
+  });
 
   const [deleteLecturer, { isLoading: loadingDelete }] =
     useDeleteLecturersMutation();
@@ -200,10 +208,12 @@ const LecturerListScreen = () => {
     },
     {
       accessorKey: "faculty.name",
+      enableEditing: false,
       header: "KHOA",
     },
     {
       accessorKey: "profile.profileCode",
+      enableEditing: false,
       header: "MA GV",
     },
     {
@@ -292,17 +302,36 @@ const LecturerListScreen = () => {
               <>
                 <>
                   <form onSubmit={handleSubmit}>
-                    <TextField
-                      type="text"
-                      variant="outlined"
-                      color="secondary"
-                      label="MÃ GV"
-                      onChange={(e) => setProfileCode(e.target.value)}
-                      value={profileCode}
-                      fullWidth
-                      required
-                      sx={{ mb: 4 }}
-                    />
+                    <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
+                      <TextField
+                        type="text"
+                        variant="outlined"
+                        color="secondary"
+                        label="MÃ GV"
+                        onChange={(e) => setProfileCode(e.target.value)}
+                        value={profileCode}
+                        fullWidth
+                        required
+                        sx={{ mb: 4 }}
+                      />
+                      <TextField
+                        select
+                        variant="outlined"
+                        color="secondary"
+                        label="KHOA"
+                        onChange={(e) => {
+                          setKhoa(e.target.value);
+                        }}
+                        value={khoa}
+                        fullWidth
+                        required
+                        sx={{ mb: 4 }}
+                      >
+                        {khoas?.map((k) => (
+                          <MenuItem value={k.facultyId}>{k.name}</MenuItem>
+                        ))}
+                      </TextField>
+                    </Stack>
                     <TextField
                       type="text"
                       variant="outlined"
@@ -327,7 +356,7 @@ const LecturerListScreen = () => {
                     />
                     <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
                       <TextField
-                        type="gender"
+                        select
                         variant="outlined"
                         color="secondary"
                         label="GIỚI TÍNH"
@@ -335,7 +364,10 @@ const LecturerListScreen = () => {
                         value={gender}
                         fullWidth
                         required
-                      />
+                      >
+                        <MenuItem value="false">Nữ</MenuItem>
+                        <MenuItem value="true">Nam</MenuItem>
+                      </TextField>
                       <TextField
                         type="date"
                         variant="outlined"
