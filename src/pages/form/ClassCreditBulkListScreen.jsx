@@ -63,6 +63,8 @@ import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
 import moment from "moment";
+import { useGetSemesterQuery } from "../../slices/semesterApiSlice";
+import { AiOutlineSearch } from "react-icons/ai";
 const LecturerListScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [logoutApiCall] = useLogoutMutation();
@@ -117,6 +119,7 @@ const LecturerListScreen = () => {
   const { currentEvents, setCurrentEvents } = useCalendar();
   const [startDates, setStartDates] = useState([]);
   const [endDates, setEndDates] = useState([]);
+  const [dataLTC, setDataLTC] = useState([]);
   const resetState = () => {
     setSubjectId("");
     setRoomId("");
@@ -134,6 +137,7 @@ const LecturerListScreen = () => {
     setIsTimetableSave(false);
     setStartDates([]);
     setEndDates([]);
+    setDataLTC([]);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,6 +148,9 @@ const LecturerListScreen = () => {
         listSubjects,
         listRooms,
         startDate,
+        regisClosing,
+        regisOpening,
+        semesterId: semesterNo,
       }).unwrap();
       toast.success("Thời khóa biểu được tạo!");
       // resetState();
@@ -323,28 +330,27 @@ const LecturerListScreen = () => {
       header: "GIẢNG VIÊN",
     },
     {
-      accessorKey: "regisOpening", //normal accessorKey
-      header: "NGÀY MỞ ĐĂNG KÝ",
+      accessorKey: "className", //normal accessorKey
+      header: "Lớp",
     },
     {
-      accessorKey: "regisClosing", //normal accessorKey
-      header: "HẠN ĐĂNG KÝ",
+      accessorKey: "groupNumber", //normal accessorKey
+      header: "Nhóm",
     },
     {
       accessorKey: "year", //normal accessorKey
       header: "NĂM",
-      size: 20,
     },
     {
       accessorKey: "semesterNo", //normal accessorKey
       header: "HỌC KỲ",
-      size: 20,
     },
     {
       accessorKey: "status", //normal accessorKey
       header: "Trạng thái",
     },
   ]);
+
   Object.defineProperties(timetable, [
     {
       end: {
@@ -395,6 +401,46 @@ const LecturerListScreen = () => {
         allDay: selectInfo.allDay,
       });
     }
+  };
+  const {
+    data: semesterData,
+    isLoading: loadingSemester,
+    error: errorSemester,
+    refetch: refetchSemester,
+  } = useGetSemesterQuery({
+    searchRequest,
+  });
+  async function postData(url = "", data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: "follow", // manual, *follow, error
+      referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data), // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      postData(
+        "http://localhost:8080/in-training/v1/admin/class-credit-maintenance/retrieve",
+        { semesterId: semesterNo }
+      ).then((data) => {
+        setDataLTC(data);
+      });
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
+    }
+    // refetch();
+    navigate("/class-credit-bulk");
   };
 
   const theme = useMemo(() =>
@@ -612,11 +658,64 @@ const LecturerListScreen = () => {
               <Message variant="danger">{error.data.message}</Message>
             ) : (
               <>
+                <form onSubmit={handleSearch}>
+                  <Stack spacing={3} direction="row" sx={{}} mb={4}>
+                    <TextField
+                      select
+                      variant="outlined"
+                      color="secondary"
+                      label="Học kỳ"
+                      onChange={(e) => {
+                        setSemesterNo(e.target.value);
+                      }}
+                      value={semesterNo}
+                      fullWidth
+                      required
+                    >
+                      {semesterData?.map((s) => (
+                        <MenuItem value={s.semesterId}>{s.name}</MenuItem>
+                      ))}
+                    </TextField>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      type="submit"
+                      style={{ height: "50px" }}
+                    >
+                      <AiOutlineSearch type="submit" />
+                    </Button>
+                  </Stack>
+                </form>
+                <Box sx={{ mb: 4 }}>
+                  <ThemeProvider theme={theme}>
+                    <MaterialReactTable
+                      columns={columns}
+                      data={dataLTC}
+                      // enableRowActions
+                      // enableEditing
+                      // onEditingRowCancel={() => setValidationErrors({})}
+                      // onEditingRowSave={handleEditRow}
+                      // renderRowActions={({ row }) => (
+                      //   <Box sx={{ display: "flex", gap: "1rem" }}>
+                      //     <Tooltip title="edit">
+                      //       <IconButton
+                      //         variant="danger"
+                      //         // color="error"
+                      //         onClick={() => editHandler(row.original)}
+                      //       >
+                      //         <Edit />
+                      //       </IconButton>
+                      //     </Tooltip>
+                      //   </Box>
+                      // )}
+                    />
+                  </ThemeProvider>
+                </Box>
+
                 <>
                   <form onSubmit={handleSubmit}>
-                    {console.log(lecturers)}
                     <Box sx={{ mb: 4 }}>
-                      <Stack
+                      {/* <Stack
                         spacing={2}
                         direction="row"
                         sx={{ marginBottom: 4 }}
@@ -633,7 +732,7 @@ const LecturerListScreen = () => {
                           }}
                           popupHeight="200"
                         ></MultiSelectComponent>
-                      </Stack>
+                      </Stack> */}
                       <MultiSelectComponent
                         {...listRooms}
                         value={listRooms}
@@ -659,41 +758,27 @@ const LecturerListScreen = () => {
                         fullWidth
                         required
                       />
+                      <TextField
+                        type="date"
+                        variant="outlined"
+                        color="secondary"
+                        label="NGÀY BẮT ĐẦU DK"
+                        onChange={(e) => setRegisOpening(e.target.value)}
+                        value={regisOpening}
+                        fullWidth
+                        required
+                      />
+                      <TextField
+                        type="date"
+                        variant="outlined"
+                        color="secondary"
+                        label="NGÀY KT DK"
+                        onChange={(e) => setRegisClosing(e.target.value)}
+                        value={regisClosing}
+                        fullWidth
+                        required
+                      />
                     </Stack>
-                    {/* <Stack spacing={3} direction="row" sx={{}}>
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="Số lượng tối thiểu"
-                        onChange={(e) => setMinSize(e.target.value)}
-                        value={minSize}
-                        required
-                        fullWidth
-                        sx={{ mb: 4 }}
-                      />
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="NĂM HỌC"
-                        onChange={(e) => setYear(e.target.value)}
-                        value={year}
-                        required
-                        fullWidth
-                        sx={{ mb: 4 }}
-                      />
-                      <TextField
-                        type="number"
-                        variant="outlined"
-                        color="secondary"
-                        label="HỌC KỲ"
-                        onChange={(e) => setSemesterNo(e.target.value)}
-                        value={semesterNo}
-                        fullWidth
-                        sx={{ mb: 4 }}
-                      />
-                    </Stack> */}
                     <Button variant="outlined" color="secondary" type="submit">
                       Thêm
                     </Button>

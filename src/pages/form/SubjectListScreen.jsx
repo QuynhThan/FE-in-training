@@ -131,7 +131,6 @@ const ProductListScreen = () => {
       try {
         const response = await editSubject(values);
         toast.success("Subject Edited");
-        window.confirm("Subject Edited SUCCESS");
         resetState();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
@@ -187,7 +186,8 @@ const ProductListScreen = () => {
   const deleteHandler = async (subject) => {
     if (window.confirm("Are you sure")) {
       try {
-        await deleteProduct(subject);
+        await deleteProduct(subject).unwrap();
+        toast.success("Xóa thành công!");
         refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);

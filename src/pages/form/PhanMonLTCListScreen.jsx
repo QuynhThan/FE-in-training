@@ -43,6 +43,13 @@ import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { logout } from "../../slices/authSlice";
 import ToastServive from "react-material-toast";
+import {
+  useCreateClassCreditsMutation,
+  useGetClassCreditsQuery,
+  usePhanCongMutation,
+} from "../../slices/classCreditApiSlice";
+import { useGetSemesterQuery } from "../../slices/semesterApiSlice";
+import { AiOutlineSearch } from "react-icons/ai";
 
 const ProductListScreen = () => {
   const toast = ToastServive.new({
@@ -71,7 +78,7 @@ const ProductListScreen = () => {
     }
   }, []);
   //
-  const [subjectCode, setSubjectCode] = useState(" ");
+  const [ltcCode, setltcCode] = useState(" ");
   // const subject = null;
   const [name, setName] = useState("");
   const [creditNum, setCreditNum] = useState(0);
@@ -82,7 +89,9 @@ const ProductListScreen = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [listGV, setListGV] = useState([]);
   const [allGV, setAllGV] = useState([]);
+  const [semesterNo, setSemesterNo] = useState(0);
   const [subject, setSubject] = useState({});
+  const [data, setData] = useState([]);
   const [uploadProductImage, { isLoading: loadingUpload }] =
     useUploadProductImageMutation();
 
@@ -90,7 +99,7 @@ const ProductListScreen = () => {
   const formData = new FormData();
 
   const resetState = () => {
-    setSubjectCode("");
+    setltcCode("");
     setName("");
     setCreditNum(0);
     setTheoryNum(0);
@@ -98,23 +107,26 @@ const ProductListScreen = () => {
     setAcademicYear(0);
     setPrerequisite("");
     setListGV([]);
+    setSemesterNo(0);
+    setData([]);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (window.confirm("Are you sure?")) {
       try {
-        const response = await createSubject({
-          subjectCode,
+        const response = await phanCong({
+          classCreditId: ltcCode,
           listGV,
           phanMon: true,
         }).unwrap();
         toast.success("Phan Mon thanh cong");
-        resetState();
+        // resetState();
+        handleSearch(e);
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
       refetch();
-      navigate("/phan-mon");
+      navigate("/phan-mon-ltc");
     }
   };
 
@@ -147,8 +159,16 @@ const ProductListScreen = () => {
   const { pageNumber } = useParams();
 
   const searchRequest = {};
+  // const { data, isLoading: loadingCC, error: errorCC, refetch: refetchCC } = useGetClassCreditsQuery({
+  //   se
+  // });
 
-  const { data, isLoading, error, refetch } = useGetSubjectsQuery({
+  const {
+    data: semesterData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetSemesterQuery({
     searchRequest,
   });
   const {
@@ -175,8 +195,8 @@ const ProductListScreen = () => {
 
   const editHandler = async (subject) => {
     try {
-      setSubjectCode(subject?.subjectCode);
-      setName(subject?.name);
+      setltcCode(subject?.classCreditId);
+      setName(subject?.showDetails);
       setListGV(subject?.listGV);
       // setListGV(["GV 1"]);
       setAllGV(["GV 1", "GV 2", "GV 3"]);
@@ -186,63 +206,54 @@ const ProductListScreen = () => {
     }
   };
 
-  const [createSubject, { isLoading: loadingCreate }] =
-    useCreateSubjectMutation();
+  const [phanCong, { isLoading: loadingCreate }] = usePhanCongMutation();
 
   const [editSubject, { isLoading: loadingEdit }] = useUpdateSubjectMutation();
   const listData = ["GV01", "GV02"];
   const columns = useMemo(() => [
     {
-      accessorKey: "subjectId",
+      accessorKey: "classCreditId",
       header: "ID",
       enableEditing: false,
-      size: 20,
+      size: 1,
     },
     {
-      accessorKey: "subjectCode",
-      header: "MÃ MH",
-      size: 100,
-      muiEditTextFieldProps: {
-        type: "text",
-        required: true,
-        error: !!validationErrors?.subjectCode,
-        helperText: validationErrors?.subjectCode,
-        //remove any previous validation errors when user focuses on the input
-        onFocus: () =>
-          setValidationErrors({
-            ...validationErrors,
-            subjectCode: undefined,
-          }),
-        //optionally add validation checking for onBlur or onChange
-      },
+      accessorKey: "subject.name",
+      header: "MÔN HỌC",
+      enableEditing: false,
     },
     {
-      accessorKey: "name",
-      header: "TÊN",
-      size: 300,
-      muiEditTextFieldProps: {
-        type: "text",
-        required: true,
-        error: !!validationErrors?.name,
-        helperText: validationErrors?.name,
-        //remove any previous validation errors when user focuses on the input
-        onFocus: () =>
-          setValidationErrors({
-            ...validationErrors,
-            firstName: undefined,
-          }),
-      },
-    },
-
-    {
-      accessorKey: "prerequisiteCode",
-      header: "MHTQ",
-      size: 100,
+      accessorKey: "lecturer.profile.fullName",
+      enableEditing: false,
+      header: "GIẢNG VIÊN",
     },
     {
-      accessorKey: "listGVStr",
-      header: "DS GV",
-      size: 200,
+      accessorKey: "className", //normal accessorKey
+      header: "Lớp",
+    },
+    {
+      accessorKey: "groupNumber", //normal accessorKey
+      header: "Nhóm",
+    },
+    // {
+    //   accessorKey: "regisOpening", //normal accessorKey
+    //   header: "NGÀY MỞ ĐĂNG KÝ",
+    // },
+    // {
+    //   accessorKey: "regisClosing", //normal accessorKey
+    //   header: "HẠN ĐĂNG KÝ",
+    // },
+    {
+      accessorKey: "year", //normal accessorKey
+      header: "NĂM",
+    },
+    {
+      accessorKey: "semesterNo", //normal accessorKey
+      header: "HỌC KỲ",
+    },
+    {
+      accessorKey: "status", //normal accessorKey
+      header: "Trạng thái",
     },
   ]);
   const theme = useMemo(() =>
@@ -253,11 +264,53 @@ const ProductListScreen = () => {
     })
   );
   const handleSelectSubject = (key) => {
-    data.map((subject) => {
-      if (subject.subjectCode === key) {
-        editHandler(subject);
+    data.map((s) => {
+      if (s.classCreditId === key) {
+        editHandler(s);
       }
     });
+  };
+  // const [searchLTC, { isLoading: loadingLTC }] = useGetClassCreditsQuery();
+  async function postData(url = "", data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: "follow", // manual, *follow, error
+      referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data), // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    console.log("1231231231");
+    try {
+      postData(
+        "http://localhost:8080/in-training/v1/admin/class-credit-maintenance/retrieve",
+        { semesterId: semesterNo }
+      ).then((data) => {
+        console.log(data); // JSON data parsed by `data.json()` call
+        setData(data);
+      });
+      // const response = await useGetClassCreditsQuery({
+      //   semesterId: semesterNo,
+      // });
+      // // toast.success("Class Credit Created");
+      // // resetState();
+      // console.log(response);
+      // setData(response.getAll());
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
+    }
+    // refetch();
+    navigate("/phan-mon-ltc");
   };
 
   return (
@@ -273,10 +326,38 @@ const ProductListScreen = () => {
           </Button>
         </Col> */}
         </Row>
+        <form onSubmit={handleSearch}>
+          <Stack spacing={3} direction="row" sx={{}}>
+            <TextField
+              select
+              variant="outlined"
+              color="secondary"
+              label="Học kỳ"
+              onChange={(e) => {
+                setSemesterNo(e.target.value);
+              }}
+              value={semesterNo}
+              fullWidth
+              required
+            >
+              {semesterData?.map((s) => (
+                <MenuItem value={s.semesterId}>{s.name}</MenuItem>
+              ))}
+            </TextField>
+            <Button
+              variant="outlined"
+              color="primary"
+              type="submit"
+              style={{ height: "50px" }}
+            >
+              <AiOutlineSearch type="submit" />
+            </Button>
+          </Stack>
+        </form>
 
         {loadingCreate && <Loader />}
         {loadingDelete && <Loader />}
-        {isLoading ? (
+        {isLoading && data ? (
           <Loader />
         ) : error ? (
           <Message variant="danger">{error?.data?.message}</Message>
@@ -328,9 +409,9 @@ const ProductListScreen = () => {
                       type="text"
                       variant="outlined"
                       color="secondary"
-                      label="MÃ MH"
-                      onChange={(e) => setSubjectCode(e.target.value)}
-                      value={subjectCode}
+                      label="MÃ LTC"
+                      onChange={(e) => setltcCode(e.target.value)}
+                      value={ltcCode}
                       fullWidth
                       disabled
                       required
@@ -345,14 +426,14 @@ const ProductListScreen = () => {
                       onChange={(e) => {
                         handleSelectSubject(e.target.value);
                       }}
-                      value={subjectCode}
+                      value={ltcCode}
                       fullWidth
                       required
                       sx={{ mb: 4 }}
                     >
-                      {data?.map((subject) => (
-                        <MenuItem value={subject.subjectCode}>
-                          {subject.name}
+                      {data?.map((s) => (
+                        <MenuItem value={s.classCreditId}>
+                          {s.showDetails}
                         </MenuItem>
                       ))}
                     </TextField>

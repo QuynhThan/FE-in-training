@@ -82,6 +82,7 @@ const LecturerListScreen = () => {
   const [semesterNo, setSemesterNo] = useState(0);
   const [minSize, setMinSize] = useState(0);
   const [lopHoc, setLopHoc] = useState(0);
+  const [nhom, setNhom] = useState(0);
   // const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -114,6 +115,7 @@ const LecturerListScreen = () => {
           minSize,
           listClass,
           lopHoc,
+          groupNumber: nhom,
         }).unwrap();
         toast.success("Class Credit Created");
         resetState();
@@ -226,13 +228,21 @@ const LecturerListScreen = () => {
       header: "GIẢNG VIÊN",
     },
     {
-      accessorKey: "regisOpening", //normal accessorKey
-      header: "NGÀY MỞ ĐĂNG KÝ",
+      accessorKey: "className", //normal accessorKey
+      header: "Lớp",
     },
     {
-      accessorKey: "regisClosing", //normal accessorKey
-      header: "HẠN ĐĂNG KÝ",
+      accessorKey: "groupNumber", //normal accessorKey
+      header: "Nhóm",
     },
+    // {
+    //   accessorKey: "regisOpening", //normal accessorKey
+    //   header: "NGÀY MỞ ĐĂNG KÝ",
+    // },
+    // {
+    //   accessorKey: "regisClosing", //normal accessorKey
+    //   header: "HẠN ĐĂNG KÝ",
+    // },
     {
       accessorKey: "year", //normal accessorKey
       header: "NĂM",
@@ -369,6 +379,17 @@ const LecturerListScreen = () => {
                           <MenuItem value={x.classId}>{x.name}</MenuItem>
                         ))}
                       </TextField>
+                      <TextField
+                        type="number"
+                        variant="outlined"
+                        color="secondary"
+                        label="Nhóm"
+                        onChange={(e) => setNhom(e.target.value)}
+                        value={nhom}
+                        required
+                        fullWidth
+                        sx={{ mb: 4 }}
+                      />
                       {/* <MultiSelectComponent
                         {...listClass}
                         value={listClass}
@@ -416,8 +437,8 @@ const LecturerListScreen = () => {
                         </MenuItem>
                       ))}
                     </TextField> */}
-                    <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
-                      <TextField
+                    {/* <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}> */}
+                    {/* <TextField
                         type="date"
                         variant="outlined"
                         color="secondary"
@@ -436,8 +457,8 @@ const LecturerListScreen = () => {
                         value={regisClosing}
                         fullWidth
                         required
-                      />
-                    </Stack>
+                      /> */}
+                    {/* </Stack> */}
                     <Stack spacing={3} direction="row" sx={{}}>
                       <TextField
                         type="number"

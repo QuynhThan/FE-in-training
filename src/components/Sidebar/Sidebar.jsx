@@ -156,7 +156,7 @@ const Sidebar = () => {
             <p>Đăng ký môn</p>
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="phan-mon"
             className={css.item}
             title="Phân Môn"
@@ -165,6 +165,17 @@ const Sidebar = () => {
           >
             <AiOutlineTable size={30} />
             <p>Phân Môn</p>
+          </NavLink> */}
+
+          <NavLink
+            to="phan-mon-ltc"
+            className={css.item}
+            title="Phân Môn"
+            hidden={userInfo.role !== "employee"}
+            style={{ textDecoration: "none", textAlign: "center" }}
+          >
+            <AiOutlineTable size={30} />
+            <p>Phân Môn LTC</p>
           </NavLink>
         </div>
       ) : (

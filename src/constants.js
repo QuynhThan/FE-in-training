@@ -34,6 +34,9 @@ export const STUDENT_CLASS = ROOT_ADMIN + '/student-class';
 // faculty
 export const FACULTY = ROOT_ADMIN + '/faculty-maintenance';
 
+// semester
+export const SEMESTER_URL = ROOT_ADMIN + '/semester';
+
 // common
 
 export const USERS_URL = '/api/users';

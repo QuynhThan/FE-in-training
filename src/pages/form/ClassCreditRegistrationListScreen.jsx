@@ -163,7 +163,7 @@ const LecturerListScreen = () => {
   const { pageNumber } = useParams();
   const searchRequest = {};
   const searchCCRequest = {
-    userName: tenTk,
+    userName: userInfo.userName,
     role: "student",
     filters: [
       {

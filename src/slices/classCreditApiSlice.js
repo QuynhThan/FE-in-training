@@ -63,9 +63,9 @@ export const ClassCreditsApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ['Lecturers'],
     }),
-    createReview: builder.mutation({
+    phanCong: builder.mutation({
       query: (data) => ({
-        url: `${CLASS_CREDIT_URL}/${data.productId}/reviews`,
+        url: `${CLASS_CREDIT_URL}/phan-cong`,
         method: 'POST',
         body: data,
       }),
@@ -96,7 +96,7 @@ export const {
   useUpdateClassCreditsMutation,
   useRetrieveCCMutation,
   useDeleteClassCreditsMutation,
-  useCreateReviewMutation,
+  usePhanCongMutation,
   useGetTopProductsQuery,
   useGetInvalidProductsQuery,
   useGetFilterQuery,
